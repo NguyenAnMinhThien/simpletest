@@ -153,7 +153,7 @@
         }
       }
 
-      function Eposide(name, url, subtitlePaths) {
+      function Eposide(name, url, content, subtitlePaths, Additional2) {
         textTractArray = [];
         subtitlePaths.forEach((item, index) => {
           textTractArray.push({
@@ -163,22 +163,32 @@
             default: item.split(".").at(-2) === "vi",
           });
         });
+        if (content.toLowerCase().includes("important")) {
+          mythumbnail = "thumbnals/important.jpg";
+        } else if (content.toLowerCase().includes("action")) {
+          mythumbnail = "thumbnals/action.jpg";
+        } else {
+          mythumbnail = "thumbnals/flower.jpg";
+        }
+
         return {
-          name: name,
+          name: name.split("_EP").at(-1).split('_')[0],
+          fullname: name,
           description: "this is an adventure, so feel free to try !",
-          duration: 45,
+          // duration: parseInt(name.split("_EP").at(-1).split('_')[0]), // will appear the convert number in min on result 1:42 for ep 102 !
           sources: [{ src: url, type: "video/mp4" }],
           thumbnail: [
             {
-              srcset: "thumbnals/flower.jpg",
+              srcset: mythumbnail,
               type: "image/jpeg",
               media: "(min-width: 200px;)",
             },
-            {
-              src: "thumbnals/flower.jpg",
-            },
+            // {
+            //   src: "thumbnals/flower.jpg",
+            // },
           ],
           textTracks: textTractArray,
+          patterns: Additional2,
         };
       }
 
@@ -189,21 +199,49 @@
         querryArray = await queryToBackend(movieName, range);
         console.log("success query to backend", querryArray);
 
+        // sort the data by ep. Also, move important' to top and action' to bottom.
+        querryArray.sort((a, b) => a.ep - b.ep);
+        if (keyword != "") {
+          //only arrange the ep follow content in review mode
+          var importantContent = [];
+          var actionContent = [];
+          var removeItems = [];
+
+          querryArray.forEach((item, index) => {
+            console.log("check content for keyword arrange", item.content);
+            if (item.content.toLowerCase().includes("important")) {
+              importantContent.push(item);
+              removeItems.push(index);
+            } else if (item.content.toLowerCase().includes("action")) {
+              actionContent.push(item);
+              removeItems.push(index);
+            }
+          });
+          querryArray = querryArray.filter(
+            (item, index) => !removeItems.includes(index),
+          );
+        }
+        querryArray = importantContent
+          .concat(querryArray)
+          .concat(actionContent);
+
         videoplaylist = new Array();
         if (keyword.value == "") {
           for (let i = 0; i < querryArray.length; i++) {
             url = querryArray[i].url;
             name = querryArray[i].movie + "_EP" + querryArray[i].ep.toString();
+            content = querryArray[i].content;
             window.queryData.push({
               name: name,
-              content: querryArray[i].fullContent,
+              content: content,
               Additional1: querryArray[i].Additional1,
+              Additional2: "", // currently no use Additional2 in fullEp.
             });
             subtitlePaths =
               querryArray[i].subtitle === null
                 ? []
                 : querryArray[i].subtitle.split("\n");
-            var myMovieEp = Eposide(name, url, subtitlePaths);
+            var myMovieEp = Eposide(name, url, content, subtitlePaths, "");
 
             videoplaylist.push(myMovieEp);
           }
@@ -214,17 +252,25 @@
               .split("/")
               .at(-1)
               .split(".")[0];
+            content = querryArray[i].content;
             window.queryData.push({
               name: name,
-              content: querryArray[i].content,
+              content: content,
               Additional1: querryArray[i].Additional1,
+              Additional2: querryArray[i].Additional2,
             });
 
             subtitlePaths =
               querryArray[i].subtitle === null
                 ? []
                 : querryArray[i].subtitle.split("\n");
-            var myMovieEp = Eposide(name, url, subtitlePaths);
+            var myMovieEp = Eposide(
+              name,
+              url,
+              content,
+              subtitlePaths,
+              querryArray[i].Additional2,
+            );
 
             videoplaylist.push(myMovieEp);
           }
@@ -240,7 +286,28 @@
       async function mainThread(moviename, keyword, min, max, series) {
         window.player = videojs("video");
         myPlaylist = await createPlaylist(moviename, [min, max]);
+        // myPlaylist.sort((a, b) => a.ep - b.ep);
+
+        // if (keyword != "") { //only arrange the ep follow content in review mode
+        //   var importantContent = [];
+        //   var actionContent = [];
+        //   var removeItems = [];
+
+        //   myPlaylist.forEach((item, index) => {
+        //     console.log("check content for keyword arrange", item.content);
+        //     if (item.content.toLowerCase().includes("important")) {
+        //       importantContent.push(item);
+        //       removeItems.push(index);
+        //     } else if (item.content.toLowerCase().includes("action")) {
+        //       actionContent.push(item);
+        //       removeItems.push(index);
+        //     }
+        //   });
+        //   myPlaylist = myPlaylist.filter((item, index) => !removeItems.includes(index));
+        // }
+
         console.log("success create playlist", myPlaylist);
+        player.playlist([]); // clear the default playlist, otherwise, when search again, the new playlist will be added to the old one
         player.playlist(myPlaylist);
 
         player.playlist.autoadvance(0);
@@ -248,7 +315,7 @@
         player.ready(function () {
           this.hotkeys({
             volumeStep: 0.1,
-            seekStep: 5,
+            seekStep: 2,
             enableModifiersForNumbers: false,
             enableFullscreen: true,
             enableInactiveFocus: true,
@@ -295,11 +362,33 @@
 
         player.on("playlistitem", function () {
           console.log("playlist item changed");
+          currentEp =
+            player.playlistMenu.items[player.playlist.currentItem()].item;
 
           // 1. handle note editor
-          document.title =
-            player.playlistMenu.items[player.playlist.currentItem()].item.name;
+          document.title = currentEp.fullname;
           document.querySelector("#video_title").textContent = document.title;
+          // 2. move the the correct timestamp
+          if (currentEp.patterns != "" && currentEp.patterns != undefined && currentEp.patterns != null && currentEp.patterns != "None") {
+            patternsData = currentEp.patterns.replaceAll("\'", '"');
+          timestamps = JSON.parse(patternsData);
+          console.log("current ep patterns data", timestamps);
+          console.log("current time of player", player.currentTime());
+          timestamps.some((item) => { // only use some because forEach not allow break
+            console.log("check pattern", item.pattern, "with keyword", keyword);
+            if (item.pattern.includes(keyword)) {
+              player.currentTime(
+                item.timestamp
+                  .split(":")
+                  .reduce((acc, time) => 60 * acc + +time),
+              );
+              console.log("jump to timestamp", item.timestamp, "with pattern", item.pattern);
+              return true;
+            }
+            return false;
+          });
+          }
+          
           // handle overlay
           handleOverlay();
           // remove this class to make the display: none get effected
@@ -319,17 +408,19 @@
     </script>
 
     <script>
-      window.queryData = [];
+      
       const searchInput = document.querySelector('input[type="search"]');
       const min = document.querySelector("#min");
       const max = document.querySelector("#max");
       const series = document.querySelector("#series");
       const keyword = document.querySelector("#keyword");
+      // window.keyword = keyword.value.trim();
 
       searchInput.addEventListener("search", (event) => {
+        window.queryData = [];
         // Both methods retrieve the current search term
         // range is a must, but maybe no need to fill in search box, if not exist, will fill a range that is so large: 1 - 1000
-        if (keyword.value != "") {
+        if (keyword.value.trim() != "") {
           // This is for review steps at segmentations, notice the <a> tag
           document.querySelector("#owner-name > a").textContent =
             "A consistency mind can change everything";
@@ -359,7 +450,7 @@
         const value = event.target.value;
         mainThread(
           value,
-          keyword.value,
+          keyword.value.trim(),
           parseInt(searchMin),
           parseInt(searchMax),
           series.value,
