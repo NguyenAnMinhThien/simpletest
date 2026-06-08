@@ -17,7 +17,7 @@
   <body>
     <div>
       <input type="search" id="site-search" placeholder="Movie..." />
-      <input id="keyword" placeholder="keyword.." />
+      <input id="keywordbox" placeholder="keyword.." />
       <input id="min" placeholder="min.." />
       <input id="max" placeholder="max.." />
       <input id="series" placeholder="series.." />
@@ -137,7 +137,7 @@
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
-          urlQuery.searchParams.set("keyword", keyword.value);
+          urlQuery.searchParams.set("keyword", keyword);
           urlQuery.searchParams.set("series", series.value);
 
           // const response = await fetch(
@@ -163,16 +163,16 @@
             default: item.split(".").at(-2) === "vi",
           });
         });
-        if (content.toLowerCase().includes("important")) {
+        if (content != null && content.toLowerCase().includes("important")) {
           mythumbnail = "thumbnals/important.jpg";
-        } else if (content.toLowerCase().includes("action")) {
+        } else if (content != null && content.toLowerCase().includes("action")) {
           mythumbnail = "thumbnals/action.jpg";
         } else {
           mythumbnail = "thumbnals/flower.jpg";
         }
 
         return {
-          name: name.split("_EP").at(-1).split('_')[0],
+          name: name.split("_EP").at(-1).split("_")[0],
           fullname: name,
           description: "this is an adventure, so feel free to try !",
           // duration: parseInt(name.split("_EP").at(-1).split('_')[0]), // will appear the convert number in min on result 1:42 for ep 102 !
@@ -220,20 +220,20 @@
           querryArray = querryArray.filter(
             (item, index) => !removeItems.includes(index),
           );
+          querryArray = importantContent
+            .concat(querryArray)
+            .concat(actionContent);
         }
-        querryArray = importantContent
-          .concat(querryArray)
-          .concat(actionContent);
 
         videoplaylist = new Array();
-        if (keyword.value == "") {
+        if (keyword == "") {
           for (let i = 0; i < querryArray.length; i++) {
             url = querryArray[i].url;
             name = querryArray[i].movie + "_EP" + querryArray[i].ep.toString();
-            content = querryArray[i].content;
+            fullcontent = querryArray[i].fullContent;
             window.queryData.push({
               name: name,
-              content: content,
+              content: fullcontent,
               Additional1: querryArray[i].Additional1,
               Additional2: "", // currently no use Additional2 in fullEp.
             });
@@ -241,7 +241,7 @@
               querryArray[i].subtitle === null
                 ? []
                 : querryArray[i].subtitle.split("\n");
-            var myMovieEp = Eposide(name, url, content, subtitlePaths, "");
+            var myMovieEp = Eposide(name, url, fullcontent, subtitlePaths, "");
 
             videoplaylist.push(myMovieEp);
           }
@@ -284,6 +284,8 @@
       }
 
       async function mainThread(moviename, keyword, min, max, series) {
+        keyword = keyword.toLowerCase();
+        console.log("on sub mainthread keyword", keyword);
         window.player = videojs("video");
         myPlaylist = await createPlaylist(moviename, [min, max]);
         // myPlaylist.sort((a, b) => a.ep - b.ep);
@@ -369,26 +371,42 @@
           document.title = currentEp.fullname;
           document.querySelector("#video_title").textContent = document.title;
           // 2. move the the correct timestamp
-          if (currentEp.patterns != "" && currentEp.patterns != undefined && currentEp.patterns != null && currentEp.patterns != "None") {
+          if (
+            currentEp.patterns != "" &&
+            currentEp.patterns != undefined &&
+            currentEp.patterns != null &&
+            currentEp.patterns != "None"
+          ) {
             patternsData = currentEp.patterns.replaceAll("\'", '"');
-          timestamps = JSON.parse(patternsData);
-          console.log("current ep patterns data", timestamps);
-          console.log("current time of player", player.currentTime());
-          timestamps.some((item) => { // only use some because forEach not allow break
-            console.log("check pattern", item.pattern, "with keyword", keyword);
-            if (item.pattern.includes(keyword)) {
-              player.currentTime(
-                item.timestamp
-                  .split(":")
-                  .reduce((acc, time) => 60 * acc + +time),
+            timestamps = JSON.parse(patternsData);
+            console.log("current ep patterns data", timestamps);
+            console.log("current time of player", player.currentTime());
+            timestamps.some((item) => {
+              // only use some because forEach not allow break
+              console.log(
+                "check pattern",
+                item.pattern,
+                "with keyword",
+                keyword,
               );
-              console.log("jump to timestamp", item.timestamp, "with pattern", item.pattern);
-              return true;
-            }
-            return false;
-          });
+              if (item.pattern.includes(keyword)) {
+                player.currentTime(
+                  item.timestamp
+                    .split(":")
+                    .reduce((acc, time) => 60 * acc + +time),
+                );
+                console.log(
+                  "jump to timestamp",
+                  item.timestamp,
+                  "with pattern",
+                  item.pattern,
+                );
+                return true;
+              }
+              return false;
+            });
           }
-          
+
           // handle overlay
           handleOverlay();
           // remove this class to make the display: none get effected
@@ -408,19 +426,21 @@
     </script>
 
     <script>
-      
       const searchInput = document.querySelector('input[type="search"]');
       const min = document.querySelector("#min");
       const max = document.querySelector("#max");
       const series = document.querySelector("#series");
-      const keyword = document.querySelector("#keyword");
-      // window.keyword = keyword.value.trim();
+      const keywordbox = document.querySelector("#keywordbox");
+      let keyword = ""; //global declaration
 
       searchInput.addEventListener("search", (event) => {
+      keyword = keywordbox.value.trim();
+      console.log("initial keyword", keyword);
+
         window.queryData = [];
         // Both methods retrieve the current search term
         // range is a must, but maybe no need to fill in search box, if not exist, will fill a range that is so large: 1 - 1000
-        if (keyword.value.trim() != "") {
+        if (keyword != "") {
           // This is for review steps at segmentations, notice the <a> tag
           document.querySelector("#owner-name > a").textContent =
             "A consistency mind can change everything";
@@ -450,7 +470,7 @@
         const value = event.target.value;
         mainThread(
           value,
-          keyword.value.trim(),
+          keyword,
           parseInt(searchMin),
           parseInt(searchMax),
           series.value,
