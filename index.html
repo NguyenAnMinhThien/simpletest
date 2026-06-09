@@ -153,6 +153,31 @@
         }
       }
 
+      async function queryToIncreaseWatched(epname, keyword) {
+        //currently this only support in segmentations' tag, 
+        //epname: supreme_leader_EP102_17213566_446465, keyword: important
+        try {
+
+          var urlQuery = new URL(
+            "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          );
+          urlQuery.searchParams.set("epname", epname);
+
+          urlQuery.searchParams.set("keyword", keyword);
+
+
+          const response = await fetch(urlQuery);
+          const data = await response.json();
+          console.log("This is in async function, so can print in anytime, just for debugging:", data);
+   
+          return data;
+          // no need to get data
+        } catch (error) {
+          console.error("Fetch failed:", error);
+        }
+      }
+
+
       function Eposide(name, url, content, subtitlePaths, Additional2) {
         textTractArray = [];
         subtitlePaths.forEach((item, index) => {
@@ -165,7 +190,10 @@
         });
         if (content != null && content.toLowerCase().includes("important")) {
           mythumbnail = "thumbnals/important.jpg";
-        } else if (content != null && content.toLowerCase().includes("action")) {
+        } else if (
+          content != null &&
+          content.toLowerCase().includes("action")
+        ) {
           mythumbnail = "thumbnals/action.jpg";
         } else {
           mythumbnail = "thumbnals/flower.jpg";
@@ -362,6 +390,14 @@
         });
         player.textTrackSettings.updateDisplay();
 
+        player.on("ended", function () {
+          currentEp =
+            player.playlistMenu.items[player.playlist.currentItem()].item;
+          console.log("Current item has finished playing:",currentEp.fullname);
+          queryToIncreaseWatched(currentEp.fullname, keyword);
+
+          // Your code here
+        });
         player.on("playlistitem", function () {
           console.log("playlist item changed");
           currentEp =
@@ -434,8 +470,8 @@
       let keyword = ""; //global declaration
 
       searchInput.addEventListener("search", (event) => {
-      keyword = keywordbox.value.trim();
-      console.log("initial keyword", keyword);
+        keyword = keywordbox.value.trim();
+        console.log("initial keyword", keyword);
 
         window.queryData = [];
         // Both methods retrieve the current search term
