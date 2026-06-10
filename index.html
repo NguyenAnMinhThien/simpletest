@@ -16,11 +16,12 @@
   </head>
   <body>
     <div>
-      <input type="search" id="site-search" placeholder="Movie..." />
+      <input id="site-search" placeholder="Movie..." />
       <input id="keywordbox" placeholder="keyword.." />
       <input id="min" placeholder="min.." />
       <input id="max" placeholder="max.." />
       <input id="series" placeholder="series.." />
+      <button id="search-button">Search</button>
     </div>
     <div class="player-container" id="movie_player">
       <video id="video" class="video-js" controls autoplay>
@@ -154,29 +155,34 @@
       }
 
       async function queryToIncreaseWatched(epname, keyword) {
-        //currently this only support in segmentations' tag, 
+        //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
+          // var urlQuery = new URL(
+          //   "https://democors-210398985503.europe-west1.run.app",
+          // );
 
           var urlQuery = new URL(
             "https://backendincreasewatched-210398985503.europe-west1.run.app",
           );
+
           urlQuery.searchParams.set("epname", epname);
 
           urlQuery.searchParams.set("keyword", keyword);
 
-
           const response = await fetch(urlQuery);
-          const data = await response.json();
-          console.log("This is in async function, so can print in anytime, just for debugging:", data);
-   
+          const data = await response.text();
+          console.log(
+            "This is in async function, so can print in anytime, just for debugging:",
+            data,
+          );
+
           return data;
           // no need to get data
         } catch (error) {
           console.error("Fetch failed:", error);
         }
       }
-
 
       function Eposide(name, url, content, subtitlePaths, Additional2) {
         textTractArray = [];
@@ -200,7 +206,7 @@
         }
 
         return {
-          name: name.split("_EP").at(-1).split("_")[0],
+          name: "EP" + name.split("_EP").at(-1).split("_")[0]  + " Watched " + getMinWatched(keyword, { Additional2: Additional2 }) , 
           fullname: name,
           description: "this is an adventure, so feel free to try !",
           // duration: parseInt(name.split("_EP").at(-1).split('_')[0]), // will appear the convert number in min on result 1:42 for ep 102 !
@@ -220,6 +226,30 @@
         };
       }
 
+      function getMinWatched(keyword, item) {
+        // Parse JSON from item.Additional2
+        const patternsList = JSON.parse(item.Additional2.replaceAll("\'", '"'));
+
+        // Array to store watched values that match the keyword
+        const watchedValues = [];
+
+        // Loop through each pattern in patternsList
+        patternsList.forEach((pattern) => {
+          // Create regex from pattern.pattern and test if it matches keyword
+          try {
+            const regex = new RegExp(keyword, "i"); // case-insensitive
+            if (regex.test(pattern.pattern)) {
+              watchedValues.push(pattern.watched);
+            }
+          } catch (e) {
+            console.error("Invalid regex pattern:", keyword, "Error:", e);
+          }
+        });
+
+        // Return the minimum of all watched values, or null if no matches found
+        return watchedValues.length > 0 ? Math.min(...watchedValues) : null;
+      }
+
       async function createPlaylist(movieName, range) {
         subtitlePaths = [];
         arraySource = [];
@@ -236,7 +266,7 @@
           var removeItems = [];
 
           querryArray.forEach((item, index) => {
-            console.log("check content for keyword arrange", item.content);
+            // console.log("check content for keyword arrange", item.content);
             if (item.content.toLowerCase().includes("important")) {
               importantContent.push(item);
               removeItems.push(index);
@@ -248,6 +278,17 @@
           querryArray = querryArray.filter(
             (item, index) => !removeItems.includes(index),
           );
+
+          importantContent.sort(
+            (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+          );
+          querryArray.sort(
+            (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+          );
+          actionContent.sort(
+            (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+          );
+
           querryArray = importantContent
             .concat(querryArray)
             .concat(actionContent);
@@ -393,7 +434,7 @@
         player.on("ended", function () {
           currentEp =
             player.playlistMenu.items[player.playlist.currentItem()].item;
-          console.log("Current item has finished playing:",currentEp.fullname);
+          // console.log("Current item has finished playing:", currentEp.fullname);
           queryToIncreaseWatched(currentEp.fullname, keyword);
 
           // Your code here
@@ -406,6 +447,8 @@
           // 1. handle note editor
           document.title = currentEp.fullname;
           document.querySelector("#video_title").textContent = document.title;
+          const regex = new RegExp(keyword, "i"); // case-insensitive
+
           // 2. move the the correct timestamp
           if (
             currentEp.patterns != "" &&
@@ -425,7 +468,8 @@
                 "with keyword",
                 keyword,
               );
-              if (item.pattern.includes(keyword)) {
+              if (regex.test(item.pattern)) {
+                // if (item.pattern.includes(keyword)) {
                 player.currentTime(
                   item.timestamp
                     .split(":")
@@ -462,14 +506,14 @@
     </script>
 
     <script>
-      const searchInput = document.querySelector('input[type="search"]');
+      const searchButton = document.querySelector('#search-button');
       const min = document.querySelector("#min");
       const max = document.querySelector("#max");
       const series = document.querySelector("#series");
       const keywordbox = document.querySelector("#keywordbox");
       let keyword = ""; //global declaration
 
-      searchInput.addEventListener("search", (event) => {
+      searchButton.addEventListener("click", (event) => {
         keyword = keywordbox.value.trim();
         console.log("initial keyword", keyword);
 
