@@ -205,9 +205,11 @@
           mythumbnail = "thumbnals/flower.jpg";
         }
 
+        var watched = keyword != "" ? " Watched " + getMinWatched(keyword, { Additional2: Additional2 })  : ""; // only segmentations exist keyword and Additional2 for watched monitor. the \n not appear new line in this case.
+
         return {
           // todo: fix here, Additional2 currently not appear on full Ep
-          name: "EP" + name.split("_EP").at(-1).split("_")[0]  + " Watched " + getMinWatched(keyword, { Additional2: Additional2 }) , 
+          name: "EP" + name.split("_EP").at(-1).split("_")[0]  + watched, 
           fullname: name,
           description: "this is an adventure, so feel free to try !",
           // duration: parseInt(name.split("_EP").at(-1).split('_')[0]), // will appear the convert number in min on result 1:42 for ep 102 !
@@ -229,6 +231,7 @@
 
       function getMinWatched(keyword, item) {
         // Parse JSON from item.Additional2
+        console.trace("getMinWatched with keyword", keyword, "and item", item);
         const patternsList = JSON.parse(item.Additional2.replaceAll("\'", '"'));
 
         // Array to store watched values that match the keyword
