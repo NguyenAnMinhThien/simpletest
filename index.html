@@ -140,6 +140,7 @@
           urlQuery.searchParams.set("max", range[1]);
           urlQuery.searchParams.set("keyword", keyword);
           urlQuery.searchParams.set("series", series.value);
+          urlQuery.searchParams.set("apikey", localStorage.getItem('apikey')); //heree
 
           // const response = await fetch(
           //   "http://localhost:3000/query?v=UrbanMiracleDoctor&min=105&max=105",
