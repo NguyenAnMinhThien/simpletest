@@ -12,6 +12,7 @@
       rel="stylesheet"
     />
 
+
     <link href="examples.css" rel="stylesheet" />
   </head>
   <body>
@@ -27,7 +28,13 @@
       <button id="search-button">Search</button>
     </div>
     <div class="player-container" id="movie_player">
-      <video id="video" class="video-js" controls autoplay crossorigin="anonymous">
+      <video
+        id="video"
+        class="video-js"
+        controls
+        autoplay
+        crossorigin="anonymous"
+      >
         <!-- <source src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4" />
         <source src="http://vjs.zencdn.net/v/oceans.webm" type="video/webm" /> -->
       </video>
@@ -56,6 +63,7 @@
     <script src="https://cdn.jsdelivr.net/npm/videojs-playlist@5.2.0/dist/videojs-playlist.min.js"></script>
     <!-- <script src="node_modules/videojs-overlay/dist/videojs-overlay.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/videojs-playlist-ui@5.0.0/dist/videojs-playlist-ui.min.js"></script>
+
     <script src="./object-watch.js"></script>
     <script src="//cdn.sc.gl/videojs-hotkeys/0.2/videojs.hotkeys.min.js"></script>
     <script>
@@ -101,7 +109,7 @@
               timestamps !== null &&
               timestamps.length > 0) ||
             t >= 10
-              ? filterTimestampEditorNodes()
+              ? (filterTimestampEditorNodes(), startTimestampMonitor())
               : setTimeout(n, 500 + 100 * t);
           };
         setTimeout(n, 300);
@@ -160,10 +168,10 @@
 
       async function queryToBackend(movieName, range) {
         try {
-          var urlQuery = new URL("http://192.168.1.200:3000/query");
-          // var urlQuery = new URL(
-          //   "https://backend-210398985503.europe-west1.run.app/query",
-          // );
+          // var urlQuery = new URL("http://192.168.1.200:3000/query");
+          var urlQuery = new URL(
+            "https://backend-210398985503.europe-west1.run.app/query",
+          );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
@@ -419,7 +427,32 @@
       async function mainThread(moviename, keyword, min, max, series) {
         keyword = keyword.toLowerCase();
         console.log("on sub mainthread keyword", keyword);
-        window.player = videojs("video");
+        window.player = videojs("video", {
+          controlBar: {
+            skipButtons: {
+              forward: 5,
+              backward: 5,
+            },
+          },
+        });
+
+        // generate the PlayNextButton component
+        const Button = videojs.getComponent("Button");
+
+        class PlayNextButton extends Button {
+          constructor(player, options) {
+            super(player, options);
+            this.controlText("Play Next");
+            this.addClass("vjs-icon-next-item");
+          }
+
+          handleClick(event) {
+            player.playlist.next();
+          }
+        }
+        // 4. Register your new component with Video.js
+        videojs.registerComponent("PlayNextButton", PlayNextButton);
+
         myPlaylist = await createPlaylist(moviename, [min, max]);
         // myPlaylist.sort((a, b) => a.ep - b.ep);
 
@@ -448,6 +481,7 @@
         player.playlist.autoadvance(0);
         // add hotkey function
         player.ready(function () {
+          player.getChild("controlBar").addChild("PlayNextButton", {}, 1);
           this.hotkeys({
             volumeStep: 0.1,
             seekStep: 2,
@@ -507,9 +541,6 @@
           },
           { passive: false },
         );
-
-
-
 
         player.playlistUi({
           playOnSelect: false,
@@ -581,7 +612,7 @@
 
           // handle overlay
           handleOverlay();
-          // handle disable philo
+          // handle disable philo and enable timestamp monitor.
           handleDisablePhilo();
           // remove this class to make the display: none get effected
           if (localStorage.getItem("phone") == "yes") {
@@ -645,6 +676,71 @@
           "change",
           filterTimestampEditorNodes,
         );
+      }
+
+      // Timestamp monitoring: highlight active paragraph based on player time
+      function clearTimestampMonitor() {
+        if (window.timestampMonitorInterval) {
+          clearInterval(window.timestampMonitorInterval);
+          window.timestampMonitorInterval = null;
+        }
+      }
+
+      function startTimestampMonitor() {
+        clearTimestampMonitor();
+        window.timestampMonitorInterval = setInterval(() => {
+          // will monitor if exist the element given only.
+          const timestampEditor = document.querySelector("#timestamp-editor");
+          if (!timestampEditor || !window.player) return;
+
+          // const pNodes = Array.from(timestampEditor.querySelectorAll("p"));
+          // get only the visible nodes
+          const pNodes = Array.from(
+            timestampEditor.querySelectorAll("p"),
+          ).filter((el) => {
+            return window.getComputedStyle(el).display !== "none";
+          });
+          if (pNodes.length === 0) return;
+
+          // Extract leading timestamps (HH:MM:SS or MM:SS) into seconds or null
+          const times = pNodes.map((node) => {
+            const m = (node.textContent || "").match(/^(?:\d{1,2}:){1,2}\d{2}/);
+            if (!m) return null;
+            const parts = m[0].split(":").map(Number);
+            return parts.reduce((acc, v) => acc * 60 + v, 0);
+          });
+
+          const current =
+            typeof window.player.currentTime === "function"
+              ? window.player.currentTime()
+              : window.player.currentTime || 0;
+
+          let activeIndex = -1;
+          for (let i = 0; i < times.length; i++) {
+            if (times[i] === null) continue;
+            // find next non-null time as end
+            let end = Infinity;
+            // i is the index of the p tag that contains the seconds in the range given, while times[i] is the seconds itself.
+            for (let j = i + 1; j < times.length; j++) {
+              if (times[j] !== null) {
+                end = times[j];
+                break;
+              }
+            }
+            if (current >= times[i] && current < end) {
+              activeIndex = i;
+              break;
+            }
+          }
+
+          pNodes.forEach((node, idx) => {
+            if (idx === activeIndex) {
+              node.style.backgroundColor = "rgba(0,120,215,0.25)"; // blue highlight
+            } else {
+              node.style.backgroundColor = "";
+            }
+          });
+        }, 500);
       }
 
       searchButton.addEventListener("click", (event) => {
