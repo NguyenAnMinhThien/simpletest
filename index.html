@@ -21,10 +21,13 @@
       <input id="min" placeholder="min.." />
       <input id="max" placeholder="max.." />
       <input id="series" placeholder="series.." />
+      <label>
+        <input id="disable-philo-checkbox" type="checkbox" /> Dissable philo
+      </label>
       <button id="search-button">Search</button>
     </div>
     <div class="player-container" id="movie_player">
-      <video id="video" class="video-js" controls autoplay>
+      <video id="video" class="video-js" controls autoplay crossorigin="anonymous">
         <!-- <source src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4" />
         <source src="http://vjs.zencdn.net/v/oceans.webm" type="video/webm" /> -->
       </video>
@@ -44,6 +47,10 @@
       <a>Life is an adventure</a>
       <!-- <a>A consistency mind can change everything</a> -->
     </h2>
+
+    <textarea id="AllPatterns">
+    This is the default text inside the box.
+    </textarea>
 
     <script src="//cdn.jsdelivr.net/npm/video.js@8.23.7/dist/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-playlist@5.2.0/dist/videojs-playlist.min.js"></script>
@@ -78,6 +85,28 @@
           };
         setTimeout(n, 300);
       }
+
+      function handleDisablePhilo() {
+        var t = 0,
+          n = function () {
+            t++;
+
+            timestampEditor = document.querySelector("#timestamp-editor");
+            if (timestampEditor !== null) {
+              timestamps = timestampEditor.querySelectorAll("p");
+            }
+
+            // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
+            (timestampEditor !== null &&
+              timestamps !== null &&
+              timestamps.length > 0) ||
+            t >= 10
+              ? filterTimestampEditorNodes()
+              : setTimeout(n, 500 + 100 * t);
+          };
+        setTimeout(n, 300);
+      }
+
       function removeTitleBar() {
         document
           .querySelector("#timestamp-title-bar")
@@ -131,23 +160,23 @@
 
       async function queryToBackend(movieName, range) {
         try {
-          // var urlQuery = new URL("http://192.168.1.200:3000/query");
-          var urlQuery = new URL(
-            "https://backend-210398985503.europe-west1.run.app/query",
-          );
+          var urlQuery = new URL("http://192.168.1.200:3000/query");
+          // var urlQuery = new URL(
+          //   "https://backend-210398985503.europe-west1.run.app/query",
+          // );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
           urlQuery.searchParams.set("keyword", keyword);
           urlQuery.searchParams.set("series", series.value);
-          urlQuery.searchParams.set("apikey", localStorage.getItem('apikey')); //heree
+          urlQuery.searchParams.set("apikey", localStorage.getItem("apikey")); //heree
 
           // const response = await fetch(
           //   "http://localhost:3000/query?v=UrbanMiracleDoctor&min=105&max=105",
           // );
           const response = await fetch(urlQuery);
           const data = await response.json();
-          // console.log(data);
+          console.log("hihi," + JSON.stringify(data));
           // window.hihi = "haha";
           return data; // after query, data now is an array of json object, can access to an item using data[i].ep
         } catch (error) {
@@ -206,11 +235,14 @@
           mythumbnail = "thumbnals/flower.jpg";
         }
 
-        var watched = keyword != "" ? " Watched " + getMinWatched(keyword, { Additional2: Additional2 })  : ""; // only segmentations exist keyword and Additional2 for watched monitor. the \n not appear new line in this case.
+        var watched =
+          keyword != ""
+            ? " Watched " + getMinWatched(keyword, { Additional2: Additional2 })
+            : ""; // only segmentations exist keyword and Additional2 for watched monitor. the \n not appear new line in this case.
 
         return {
           // todo: fix here, Additional2 currently not appear on full Ep
-          name: "EP" + name.split("_EP").at(-1).split("_")[0]  + watched, 
+          name: "EP" + name.split("_EP").at(-1).split("_")[0] + watched,
           fullname: name,
           description: "this is an adventure, so feel free to try !",
           // duration: parseInt(name.split("_EP").at(-1).split('_')[0]), // will appear the convert number in min on result 1:42 for ep 102 !
@@ -258,8 +290,35 @@
       async function createPlaylist(movieName, range) {
         subtitlePaths = [];
         arraySource = [];
-        console.log("before query",movieName, range, keyword);
-        querryArray = await queryToBackend(movieName, range);
+        console.log("before query", movieName, range, keyword);
+        data = await queryToBackend(movieName, range);
+        querryArray = data.rows;
+        console.log("type of data.rows", typeof data.rows);
+        console.log("type of data.rowsPattern", typeof data.rowsPattern);
+        let AllPatternCanExistFromRegexMovie = "";
+        if (
+          data.rowsPattern != "No existed, please add at additional info page"
+        ) {
+          const rowsPattern = data.rowsPattern;
+          console.log("rowsPattern", rowsPattern);
+          if (rowsPattern.length > 0) {
+            rowsPattern.forEach((element) => {
+              if (element.pattern != null) {
+                AllPatternCanExistFromRegexMovie += element.pattern;
+              }
+            });
+          }
+          console.log(
+            "AllPatternCanExistFromRegexMovie",
+            AllPatternCanExistFromRegexMovie,
+          );
+        } else {
+          AllPatternCanExistFromRegexMovie =
+            "No existed, please add at additional info page";
+        }
+        document.getElementById("AllPatterns").value =
+          AllPatternCanExistFromRegexMovie;
+
         console.log("success query to backend", querryArray);
 
         // sort the data by ep. Also, move important' to top and action' to bottom.
@@ -424,6 +483,34 @@
           });
         });
 
+        // setup volume control
+        // 2. Add custom wheel event ONLY to your specific element
+        var volumeArea = document.querySelector(".vjs-volume-panel");
+
+        volumeArea.addEventListener(
+          "wheel",
+          function (event) {
+            // Prevent default page scroll
+            event.preventDefault();
+
+            // Determine scroll direction
+            var delta = Math.sign(event.deltaY);
+            var currentVolume = player.volume();
+
+            if (delta < 0) {
+              // Scrolled Up / Zoom In -> Increase Volume
+              player.volume(Math.min(1, currentVolume + 0.1));
+            } else {
+              // Scrolled Down / Zoom Out -> Decrease Volume
+              player.volume(Math.max(0, currentVolume - 0.1));
+            }
+          },
+          { passive: false },
+        );
+
+
+
+
         player.playlistUi({
           playOnSelect: false,
         });
@@ -494,6 +581,8 @@
 
           // handle overlay
           handleOverlay();
+          // handle disable philo
+          handleDisablePhilo();
           // remove this class to make the display: none get effected
           if (localStorage.getItem("phone") == "yes") {
             handleRemoveTitlebar();
@@ -511,12 +600,52 @@
     </script>
 
     <script>
-      const searchButton = document.querySelector('#search-button');
+      pattern_love = /[a-zA-Z]+\d{1,2}/i;
+
+      concate_pattern_love = /`$|` e\s{0,2},.*|` e$|` b\s{0,2},.*|` b$/i;
+
+      const disablePhiloCheckbox = document.querySelector(
+        "#disable-philo-checkbox",
+      );
+      const searchButton = document.querySelector("#search-button");
       const min = document.querySelector("#min");
       const max = document.querySelector("#max");
       const series = document.querySelector("#series");
       const keywordbox = document.querySelector("#keywordbox");
       let keyword = ""; //global declaration
+      // this function will work if change Disable philo Or when playlistitemchanged.
+      function filterTimestampEditorNodes() {
+        const timestampEditor = document.querySelector("#timestamp-editor");
+        if (!timestampEditor) {
+          return;
+        }
+
+        const mynodelist = timestampEditor.querySelectorAll("p");
+        mynodelist.forEach((node) => {
+          const originalText = node.textContent || "";
+          const cleanedText = originalText
+            .replace(/^(?:\d{1,2}:){1,2}\d{2}\s*/, "")
+            .trim();
+          // node.textContent = cleanedText;
+
+          if (disablePhiloCheckbox.checked) {
+            const isMatch =
+              pattern_love.test(cleanedText) ||
+              concate_pattern_love.test(cleanedText);
+            node.style.display = isMatch ? "" : "none";
+          } else {
+            node.style.display = "";
+          }
+        });
+      }
+
+      if (disablePhiloCheckbox) {
+        disablePhiloCheckbox.checked = screen.width < 1000;
+        disablePhiloCheckbox.addEventListener(
+          "change",
+          filterTimestampEditorNodes,
+        );
+      }
 
       searchButton.addEventListener("click", (event) => {
         keyword = keywordbox.value.trim();
@@ -537,7 +666,9 @@
         }
 
         // condition for detecting this is phone
+        // ||| have duplicate this width detection above |||
         const fullWidth = screen.width;
+        // ||| have duplicate this width detection above |||
         if (fullWidth < 1000) {
           alert("This is phone");
           localStorage.setItem("phone", "yes");
