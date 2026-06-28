@@ -448,7 +448,11 @@
           }
         } else {
           for (let i = 0; i < querryArray.length; i++) {
+            
             url = querryArray[i].outputFileName;
+            if (url == undefined || url.trim() == "") {
+              continue;
+            }
             name = querryArray[i].outputFileName
               .split("/")
               .at(-1)
