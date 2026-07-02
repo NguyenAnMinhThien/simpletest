@@ -20,6 +20,15 @@
       <input id="site-search" placeholder="Movie..." />
       <!-- <input id="keywordbox" placeholder="keyword.." /> -->
       <input id="keywordbox" list="selection" name="myBrowser" /></label>
+            <datalist id="selection">
+        
+     <select name="browser-fallback">
+              <option value="[a-zA-Z]+\d{1,2}"></option>
+
+  </select>
+
+      </datalist>
+
       <span aria-label="Insert special characters">
         <button type="button" data-insert-value="|">|</button>
         <button type="button" data-insert-value="{">{</button>
@@ -28,14 +37,7 @@
         <button type="button" data-insert-value="[">[</button>
         <button type="button" data-insert-value="]">]</button>
       </span>
-      <datalist id="selection">
-        <option value="[a-zA-Z]+\d{1,2}">
-        <!-- <option value="|"> -->
-        <!-- <option value="Internet Explorer">
-        <option value="Opera">
-        <option value="Safari">
-        <option value="Microsoft Edge"> -->
-      </datalist>
+
 
       <input id="min" placeholder="min.." style="width: 100px;"/>
       <input id="max" placeholder="max.." style="width: 100px;"/>
@@ -49,6 +51,9 @@
       </label>
       <button id="search-button">Search</button>
     </div>
+    <div>  
+        <input id="subtractOshi" placeholder="subtract.." value="2"/> 
+      </div>
     <div class="player-container" id="movie_player">
       <video
         id="video"
@@ -865,6 +870,8 @@
       }
 
       searchButton.addEventListener("click", (event) => {
+        localStorage.setItem("subtractOshi", document.querySelector("#subtractOshi").value);
+
         keyword = keywordbox.value.trim();
         console.log("initial keyword", keyword);
 
