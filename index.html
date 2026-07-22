@@ -101,27 +101,27 @@
       //     n = localStorage.getItem(t);
 
       // }
-      function concateChild() {
-        videoElement = document.querySelector("#video");
-        timestamp = document.querySelector("#timestamp-container");
-        videoElement.appendChild(timestamp);
-        timestamp.style.zIndex = 9999;
-      }
-      function handleOverlay() {
-        var t = 0,
-          n = function () {
-            t++;
+      // function concateChild() {
+      //   videoElement = document.querySelector("#video");
+      //   timestamp = document.querySelector("#timestamp-container");
+      //   videoElement.appendChild(timestamp);
+      //   timestamp.style.zIndex = 9999;
+      // }
+      // function handleOverlay() {
+      //   var t = 0,
+      //     n = function () {
+      //       t++;
 
-            videoElement = document.querySelector("#video");
-            timestamp = document.querySelector("#timestamp-container");
+      //       videoElement = document.querySelector("#video");
+      //       timestamp = document.querySelector("#timestamp-container");
 
-            // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
-            (videoElement && timestamp) || t >= 10
-              ? concateChild()
-              : setTimeout(n, 500 + 100 * t);
-          };
-        setTimeout(n, 300);
-      }
+      //       // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
+      //       (videoElement && timestamp) || t >= 10
+      //         ? concateChild()
+      //         : setTimeout(n, 500 + 100 * t);
+      //     };
+      //   setTimeout(n, 300);
+      // }
 
       function handleDisablePhilo() {
         var t = 0,
@@ -688,8 +688,8 @@
             });
           }
 
-          // handle overlay
-          handleOverlay();
+          // handle overlay, currently is intergrating to oshi already, for using with toomva and udemy also
+          // handleOverlay();
           // handle disable philo and enable timestamp monitor.
           handleDisablePhilo();
           // remove this class to make the display: none get effected
