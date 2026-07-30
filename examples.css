@@ -116,3 +116,21 @@ body {
   font-size: 18px !important;
   line-height: 1.5;
 }
+
+
+/* this 0.6 will be overided in index.html */
+.fade-in {
+  animation: fadeIn var(--fade-duration, 0.6s) ease-in-out;
+}
+
+/* Can not create 2 class if .fade-in already existed like this */
+/* .fade-in-first {
+  animation: fadeIn 1.5s ease-in-out;
+}
+ */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+

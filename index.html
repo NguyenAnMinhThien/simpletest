@@ -30,10 +30,11 @@
       </datalist>
 
       <span aria-label="Insert special characters">
+        <button type="button" data-insert-value="Clear">Clear</button>
         <button type="button" data-insert-value="|">|</button>
         <button type="button" data-insert-value="{">{</button>
         <button type="button" data-insert-value="}">}</button>
-        <button type="button" data-insert-value="\\">\</button>
+        <button type="button" data-insert-value="\">\</button>
         <button type="button" data-insert-value="[">[</button>
         <button type="button" data-insert-value="]">]</button>
       </span>
@@ -228,10 +229,10 @@
 
       async function queryToBackend(movieName, range) {
         try {
-          var urlQuery = new URL("http://192.168.1.200:3000/query");
-          // var urlQuery = new URL(
-          //   "https://backend-210398985503.europe-west1.run.app/query",
-          // );
+          // var urlQuery = new URL("http://192.168.1.200:3000/query");
+          var urlQuery = new URL(
+            "https://backend-210398985503.europe-west1.run.app/query",
+          );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
@@ -256,13 +257,13 @@
         //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
-          var urlQuery = new URL(
-            "http://192.168.1.200:7777",
-          );
-
           // var urlQuery = new URL(
-          //   "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          //   "http://192.168.1.200:7777",
           // );
+
+          var urlQuery = new URL(
+            "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          );
 
           urlQuery.searchParams.set("epname", epname);
 
@@ -639,6 +640,7 @@
         console.log("on sub mainthread keyword", keyword);
         if (!window.player) {
           window.player = videojs("video", {
+            // inactivityTimeout: 2000,
           controlBar: {
             skipButtons: {
               forward: 5,
@@ -665,7 +667,20 @@
             player.playlist.next();
           }
         }
+        class PlayPreviousButton extends Button {
+          constructor(player, options) {
+            super(player, options);
+            this.controlText("Play Previous");
+            this.addClass("vjs-icon-previous-item");
+          }
+
+          handleClick(event) {
+            player.playlist.previous();
+          }
+        }
         // 4. Register your new component with Video.js
+        videojs.registerComponent("PlayPreviousButton", PlayPreviousButton);
+
         videojs.registerComponent("PlayNextButton", PlayNextButton);
 
         myPlaylist = await createPlaylist(moviename, [min, max]);
@@ -676,11 +691,11 @@
         console.log("success create playlist", myPlaylist);
 
         player.ready(function () {
-          // the list of event is removed from player, clear the previous event register to avoid the conflict in async (the event register itself is registering in async code)
+          // the list of event is removed from player, clear the previous event register to avoid the conflict in async (the event register itself is registering in async code). But not remove the event at the first time, because it will make the control bar lost the autohide function.
         // monitorVideoCurrentTime();
-        player.off('play');
-        player.off('ended');
-        player.off('playlistitem');
+        // player.off('play');
+        // player.off('ended');
+        // player.off('playlistitem');
 
 
         player.playlist([]); // clear the default playlist, otherwise, when search again, the new playlist will be added to the old one
@@ -735,9 +750,17 @@
           
           console.log("ready ..")
           if (firstClickSearch == "yes") {
-            firstClickSearch = "no"
+            firstClickSearch = "no";
             player.getChild("controlBar").addChild("PlayNextButton", {}, 1);
+            player.getChild("controlBar").addChild("PlayPreviousButton", {}, 1);
 
+
+          }
+          else {
+            console.log("not first click search, so remove the event listener to avoid duplicate event firing, not remove at the first time to avoid this code will make the control bar loss the autohide event function")
+            player.off('play');
+            player.off('ended');
+            player.off('playlistitem');
           }
           this.hotkeys({
             volumeStep: 0.1,
@@ -876,6 +899,7 @@
       const max = document.querySelector("#max");
       const series = document.querySelector("#series");
       const keywordbox = document.querySelector("#keywordbox");
+      keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\d{1,2}" : ""; //if this is phone, then assign a specific value
       function insertTextAtCursor(target, text) {
         if (!target) {
           return;
@@ -893,9 +917,16 @@
       }
 
       document.querySelectorAll("[data-insert-value]").forEach((button) => {
+        if (button.getAttribute("data-insert-value") == "Clear") {
+        button.addEventListener("click", () => {
+          keywordbox.value = "";
+        });
+        } else {
         button.addEventListener("click", () => {
           insertTextAtCursor(keywordbox, button.getAttribute("data-insert-value"));
         });
+        }
+
       });
 
       let firstLoadingIe = "yes"; // declare this variable outside of the function to make it accessible globally
