@@ -49,18 +49,31 @@
       <label>
         <input id="disable-quill" type="checkbox" /> Disable quill
       </label>
+      <label>
+        <input id="watched" type="checkbox" /> Watched
+      </label>
       <button id="search-button">Search</button>
     </div>
     <div>  
         <input id="subtractOshi" placeholder="subtract.." value="2"/> 
+        <input id="remove-categories"  placeholder="remove categories: ignore, consider, important, action" value="ignore,consider"/> 
+              <label>
+        <input id="revert" type="checkbox" /> Revert
+      </label>
       </div>
+
     <div class="player-container" id="movie_player">
+      <!-- turn off autoplay="false" to allow the slack on beginning when conflict with oshi-->
+       <!-- opacity: 0; transition: opacity 1s ease-in-out;  -->
+        <!-- style="opacity: 0;" -->
       <video
         id="video"
         class="video-js"
         controls
         autoplay
         crossorigin="anonymous"
+        
+        
       >
         <!-- <source src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4" />
         <source src="http://vjs.zencdn.net/v/oceans.webm" type="video/webm" /> -->
@@ -91,37 +104,71 @@
     <!-- <script src="node_modules/videojs-overlay/dist/videojs-overlay.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/videojs-playlist-ui@5.0.0/dist/videojs-playlist-ui.min.js"></script>
 
-    <script src="./object-watch.js"></script>
     <script src="//cdn.sc.gl/videojs-hotkeys/0.2/videojs.hotkeys.min.js"></script>
-    <!-- Include the Quill JS library to get the instance of Quill-->
-    <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+
     <script>
-      // function hostOshiData() {
-      //   var t = "oshi_video_".concat(e),
-      //     n = localStorage.getItem(t);
+    //  function monitorVideoCurrentTime() {
+    // // Use native media events to monitor currentTime changes. Replacing the
+    // // `watch` polyfill avoids overriding the native `currentTime` accessor,
+    // // which can prevent the browser from performing actual seeks.
+    // if (typeof document === "undefined") return;
 
-      // }
-      // function concateChild() {
-      //   videoElement = document.querySelector("#video");
-      //   timestamp = document.querySelector("#timestamp-container");
-      //   videoElement.appendChild(timestamp);
-      //   timestamp.style.zIndex = 9999;
-      // }
-      // function handleOverlay() {
-      //   var t = 0,
-      //     n = function () {
-      //       t++;
+    // var video = document.querySelector("video");
 
-      //       videoElement = document.querySelector("#video");
-      //       timestamp = document.querySelector("#timestamp-container");
+    // function attachListeners(v) {
+    //   if (!v) return;
+    //   var lastTime = typeof v.currentTime === "number" ? v.currentTime : 0;
 
-      //       // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
-      //       (videoElement && timestamp) || t >= 10
-      //         ? concateChild()
-      //         : setTimeout(n, 500 + 100 * t);
-      //     };
-      //   setTimeout(n, 300);
-      // }
+    //   v.addEventListener("timeupdate", function () {
+    //     try {
+    //       if (v.currentTime !== lastTime) {
+    //         console.log(
+    //           "video currentTime changed:",
+    //           lastTime,
+    //           "=>",
+    //           v.currentTime,
+    //         );
+    //         lastTime = v.currentTime;
+    //       }
+    //     } catch (e) {
+    //       console.error("timeupdate handler error:", e);
+    //     }
+    //   });
+
+    //   v.addEventListener("seeking", function () {
+    //     console.log("video seeking to:", v.currentTime);
+    //     console.trace("hey..",v.currentTime)
+    //   });
+
+    //   v.addEventListener("seeked", function () {
+    //     console.log("video seeked to:", v.currentTime);
+    //     lastTime = v.currentTime;
+    //   });
+    // }
+
+  //   function waitForVideoAndAttach(retries) {
+  //     retries = retries || 0;
+  //     video = document.querySelector("video");
+  //     if (video) {
+  //       attachListeners(video);
+  //       return true;
+  //     }
+  //     if (retries > 20) return false;
+  //     setTimeout(function () {
+  //       waitForVideoAndAttach(retries + 1);
+  //     }, 250);
+  //     return false;
+  //   }
+
+  //   if (document.readyState === "loading") {
+  //     document.addEventListener("DOMContentLoaded", function () {
+  //       waitForVideoAndAttach(0);
+  //     });
+  //   } else {
+  //     waitForVideoAndAttach(0);
+  //   }
+  // }
+
 
       function handleDisablePhilo() {
         var t = 0,
@@ -157,23 +204,7 @@
         qlEditor = document.querySelector("#timestamp-content");
         qlEditor.style.cssText = "height: calc(100% - 2px) !important;";
       }
-      function handleRemoveTitlebar() {
-        var t = 0,
-          n = function () {
-            t++;
-
-            videoElement = document.querySelector("#video");
-            timestamp = document.querySelector("#timestamp-container");
-            titleBar = document.querySelector("#timestamp-title-bar");
-            // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
-
-            (videoElement && timestamp && titleBar) || t >= 10
-              ? removeTitleBar()
-              : setTimeout(n, 50 + 10 * t);
-          };
-        setTimeout(n, 30);
-        // use 50 10 30 instead hundreds to there is no the appear then disappear on window
-      }
+      
       function isFocused() {
         var qlEditor = document.querySelector(".ql-editor");
         var videoElement = document.querySelector("video");
@@ -197,10 +228,10 @@
 
       async function queryToBackend(movieName, range) {
         try {
-          // var urlQuery = new URL("http://192.168.1.200:3000/query");
-          var urlQuery = new URL(
-            "https://backend-210398985503.europe-west1.run.app/query",
-          );
+          var urlQuery = new URL("http://192.168.1.200:3000/query");
+          // var urlQuery = new URL(
+          //   "https://backend-210398985503.europe-west1.run.app/query",
+          // );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
@@ -213,7 +244,7 @@
           // );
           const response = await fetch(urlQuery);
           const data = await response.json();
-          console.log("hihi," + JSON.stringify(data));
+          // console.log("hihi," + JSON.stringify(data));
           // window.hihi = "haha";
           return data; // after query, data now is an array of json object, can access to an item using data[i].ep
         } catch (error) {
@@ -225,13 +256,13 @@
         //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
-          // var urlQuery = new URL(
-          //   "https://democors-210398985503.europe-west1.run.app",
-          // );
-
           var urlQuery = new URL(
-            "https://backendincreasewatched-210398985503.europe-west1.run.app",
+            "http://192.168.1.200:7777",
           );
+
+          // var urlQuery = new URL(
+          //   "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          // );
 
           urlQuery.searchParams.set("epname", epname);
 
@@ -243,7 +274,7 @@
             "This is in async function, so can print in anytime, just for debugging:",
             data,
           );
-
+          // console.trace("where this is called")
           return data;
           // no need to get data
         } catch (error) {
@@ -251,7 +282,7 @@
         }
       }
 
-      function Eposide(name, url, content, subtitlePaths, Additional2) {
+      function Eposide(name, url, content, subtitlePaths, Additional2, Additional4) {
         textTractArray = [];
         subtitlePaths.forEach((item, index) => {
           textTractArray.push({
@@ -261,23 +292,27 @@
             default: item.split(".").at(-2) === "vi",
           });
         });
-        // if (content != null && content.toLowerCase().includes("important")) {
-        if (content != null && important_pattern.test(content.toLowerCase().trim())) {
+
+        // |||||||| duplicated this in .sort alogrithm in video playlist
+        let isImportant = (content != null && important_pattern.test(content.toLowerCase().trim()) && !Additional4.includes('notimportant')) || Additional4.includes('important')
+        let isAction = (content != null && action_pattern.test(content.toLowerCase().trim()) && !Additional4.includes('notaction')) || Additional4.includes('action')
+        // |||||||| duplicated this in .sort alogrithm in video playlist
+
+        if (isImportant) {
           mythumbnail = "thumbnals/important.jpg";
-        } else if (
-          content != null &&
-          action_pattern.test(content.toLowerCase().trim())
-        ) {
+        } else if (isAction) {
           mythumbnail = "thumbnals/action.jpg";
         } else {
           mythumbnail = "thumbnals/flower.jpg";
         }
 
-        var watched =
-          keyword != ""
-            ? " Watched " + getMinWatched(keyword, { Additional2: Additional2 })
-            : ""; // only segmentations exist keyword and Additional2 for watched monitor. the \n not appear new line in this case.
+        // var watched =
+        //   keyword != ""
+        //     ? " Watched " + getMinWatched(keyword, { Additional2: Additional2 })
+        //     : ""; // only segmentations exist keyword and Additional2 for watched monitor. the \n not appear new line in this case.
 
+        // any case watched still exist
+        var watched = " Watched " + getMinWatched(keyword, { Additional2: Additional2 }) ;
         return {
           // todo: fix here, Additional2 currently not appear on full Ep
           name: "EP" + name.split("_EP").at(-1).split("_")[0] + watched,
@@ -302,7 +337,7 @@
 
       function getMinWatched(keyword, item) {
         // Parse JSON from item.Additional2
-        console.trace("getMinWatched with keyword", keyword, "and item", item);
+        // console.trace("getMinWatched with keyword", keyword, "and item", item);
         const patternsList = JSON.parse(item.Additional2.replaceAll("\'", '"'));
 
         // Array to store watched values that match the keyword
@@ -361,10 +396,9 @@
         subtitlePaths = [];
         arraySource = [];
         console.log("before query", movieName, range, keyword);
-        data = await queryToBackend(movieName, range);
-        querryArray = data.rows;
-        console.log("type of data.rows", typeof data.rows);
-        console.log("type of data.rowsPattern", typeof data.rowsPattern);
+        let data = await queryToBackend(movieName, range);
+        let querryArray = data.final_rows;
+
         AllPatternCanExistFromRegexMovie = "";
         if (
           data.rowsPattern != "No existed, please add at additional info page"
@@ -378,10 +412,10 @@
               }
             });
           }
-          console.log(
-            "AllPatternCanExistFromRegexMovie",
-            AllPatternCanExistFromRegexMovie,
-          );
+          // console.log(
+          //   "AllPatternCanExistFromRegexMovie",
+          //   AllPatternCanExistFromRegexMovie,
+          // );
         } else {
           AllPatternCanExistFromRegexMovie =
             "No existed, please add at additional info page";
@@ -394,20 +428,102 @@
 
         // sort the data by ep. Also, move important' to top and action' to bottom.
         querryArray.sort((a, b) => a.ep - b.ep);
+        let newQuerryArray = [];
 
-        if (keyword != "") {
+
+
+
+        if (document.querySelector("#revert").checked) { 
+          let removeOrKeepCategories = document.querySelector("#remove-categories").value
+          .split(",")
+          .map((item) => item.trim().toLowerCase());
+
+          removeOrKeepCategories.forEach((category) => {
+            const categoryPattern = new RegExp(
+              "(?:,\\s{0,2}|`\\s{0,2}|^)" + category + "(?:\\s{0,3}[,\\n]|$)",
+              "i",
+            );
+            newMatchingArray = querryArray.filter((item) => {
+              item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
+              let contentItem = keyword != ""? item.content : item.fullContent;
+              const isCategoryPresent =
+                (contentItem != null && categoryPattern.test(contentItem.toLowerCase().trim()) &&
+                !item.Additional4.includes("not" + category)) || item.Additional4.includes(category);
+
+       
+              console.log("this is the getting result:", item,"\n  ", isCategoryPresent)
+                  return isCategoryPresent;
+                
+            });
+            newQuerryArray.push(...newMatchingArray);
+
+          });
+          querryArray = newQuerryArray
+        }
+        else {
+        // there are 4 categories: important, action, consider, ignore. they will be filtered out depend on the remove box. If the remove box is empty then all will be kept.
+        let removeOrKeepCategories = document.querySelector("#remove-categories").value
+          .split(",")
+          .map((item) => item.trim().toLowerCase());
+
+          removeOrKeepCategories.forEach((category) => {
+            const categoryPattern = new RegExp(
+              "(?:,\\s{0,2}|`\\s{0,2}|^)" + category + "(?:\\s{0,3}[,\\n]|$)",
+              "i",
+            );
+            querryArray = querryArray.filter((item) => {
+              item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
+              let contentItem = keyword != ""? item.content : item.fullContent;
+              const isCategoryPresent =
+                (contentItem != null && categoryPattern.test(contentItem.toLowerCase().trim()) &&
+                !item.Additional4.includes("not" + category)) || item.Additional4.includes(category);
+
+       
+              
+                  return !isCategoryPresent;
+                
+            });
+          });}
+
+
+// querryArray.forEach((item, index) => {
+//   let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");
+//     item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
+
+//     const isConsider = (consider_pattern.test(item.content.toLowerCase().trim()) 
+//                         && !item.Additional4.includes('notconsider')) 
+//                         || item.Additional4.includes('consider');
+
+//     const isIgnore = (ignore_pattern.test(item.content.toLowerCase().trim()) 
+//                       && !item.Additional4.includes('notignore')) 
+//                       || item.Additional4.includes('ignore');
+
+//     if (isConsider || isIgnore) {
+//         querryArray.splice(index, 1);
+//     }
+// });
+
+
+
+        // This is fixed content can be appear in playlist when it can be important, normal, action. Other will be filtered out depend on the remove box, if the remove is important then below will not appear important' so basicly the below code won't change.
+        if (document.querySelector('#watched').checked) {
+
+          if (keyword != "") {
           //only arrange the ep follow content in review mode
           var importantContent = [];
           var actionContent = [];
           var removeItems = [];
 
           querryArray.forEach((item, index) => {
-            // console.log("check content for keyword arrange", item.content);
-            // if (item.content.toLowerCase().includes("important")) {
-            if (important_pattern.test(item.content.toLowerCase().trim())) {
+            // the content need to contain important' key AND there is no 'notimportant' mark down in Additional4
+            // or in Additional4, it includes 'important' is also ok
+            item.Additional4 = item.Additional4 == null ? [] : item.Additional4
+            isImportant = (item.content != null && important_pattern.test(item.content.toLowerCase().trim())  && !item.Additional4.includes('notimportant')) || item.Additional4.includes('important')
+            isAction = (item.content != null &&  action_pattern.test(item.content.toLowerCase().trim())  && !item.Additional4.includes('notaction')) || item.Additional4.includes('action')
+            if (isImportant) {
               importantContent.push(item);
               removeItems.push(index);
-            } else if (action_pattern.test(item.content.toLowerCase().trim())) {
+            } else if (isAction) {
               actionContent.push(item);
               removeItems.push(index);
             }
@@ -430,6 +546,23 @@
             .concat(querryArray)
             .concat(actionContent);
         }
+        else {
+          // fulfill null value of Additional4
+          querryArray.forEach((item, index) => {
+          item.Additional4 = item.Additional4 == null ? [] : item.Additional4});
+
+          // with full ep, use . to match 'any data' in watched
+          querryArray.sort(
+            (a, b) => getMinWatched('.', a) - getMinWatched('.', b),
+          );
+        }
+        } else {
+          // if not sort follow watched then at least need to fullfill these value before create Eposide
+                    querryArray.forEach((item, index) => {
+          item.Additional4 = item.Additional4 == null ? [] : item.Additional4});
+        }
+
+        
 
         videoplaylist = new Array();
         if (keyword == "") {
@@ -437,17 +570,21 @@
             url = querryArray[i].url;
             name = querryArray[i].movie + "_EP" + querryArray[i].ep.toString();
             fullcontent = querryArray[i].fullContent;
+            category = querryArray[i].Additional4;
             window.queryData.push({
               name: name,
               content: fullcontent,
+              Additional0: querryArray[i].Additional0,
               Additional1: querryArray[i].Additional1,
-              Additional2: "", // currently no use Additional2 in fullEp.
+              Additional2: querryArray[i].Additional2, // currently no use Additional2 in fullEp.
+              Additional4: querryArray[i].Additional4,
+              timeParts: querryArray[i].timeParts,
             });
             subtitlePaths =
               querryArray[i].subtitle === null
                 ? []
                 : querryArray[i].subtitle.split("\n");
-            var myMovieEp = Eposide(name, url, fullcontent, subtitlePaths, "");
+            var myMovieEp = Eposide(name, url, fullcontent, subtitlePaths, querryArray[i].Additional2, category);
 
             videoplaylist.push(myMovieEp);
           }
@@ -463,11 +600,15 @@
               .at(-1)
               .split(".")[0];
             content = querryArray[i].content;
+            category = querryArray[i].Additional4;
             window.queryData.push({
               name: name,
               content: content,
+              Additional0: querryArray[i].Additional0,
               Additional1: querryArray[i].Additional1,
               Additional2: querryArray[i].Additional2,
+              Additional4: querryArray[i].Additional4,
+              timeParts: querryArray[i].timeParts,
             });
 
             subtitlePaths =
@@ -480,6 +621,7 @@
               content,
               subtitlePaths,
               querryArray[i].Additional2,
+              category,
             );
 
             videoplaylist.push(myMovieEp);
@@ -492,10 +634,11 @@
         console.log("Just public this info:", window.queryData);
         return videoplaylist;
       }
-      async function mainThread(moviename, keyword, min, max, series) {
+      async function mainThread(moviename, min, max, series) {
         keyword = keyword.toLowerCase();
         console.log("on sub mainthread keyword", keyword);
-        window.player = videojs("video", {
+        if (!window.player) {
+          window.player = videojs("video", {
           controlBar: {
             skipButtons: {
               forward: 5,
@@ -503,6 +646,10 @@
             },
           },
         });
+        }
+        
+
+        let hasHandledInitialPlay = false;
 
         // generate the PlayNextButton component
         const Button = videojs.getComponent("Button");
@@ -526,35 +673,67 @@
         updatePatternOptionsFromText(AllPatternCanExistFromRegexMovie);
 
 
-
-        // myPlaylist.sort((a, b) => a.ep - b.ep);
-
-        // if (keyword != "") { //only arrange the ep follow content in review mode
-        //   var importantContent = [];
-        //   var actionContent = [];
-        //   var removeItems = [];
-
-        //   myPlaylist.forEach((item, index) => {
-        //     console.log("check content for keyword arrange", item.content);
-        //     if (item.content.toLowerCase().includes("important")) {
-        //       importantContent.push(item);
-        //       removeItems.push(index);
-        //     } else if (item.content.toLowerCase().includes("action")) {
-        //       actionContent.push(item);
-        //       removeItems.push(index);
-        //     }
-        //   });
-        //   myPlaylist = myPlaylist.filter((item, index) => !removeItems.includes(index));
-        // }
-
         console.log("success create playlist", myPlaylist);
+
+        player.ready(function () {
+          // the list of event is removed from player, clear the previous event register to avoid the conflict in async (the event register itself is registering in async code)
+        // monitorVideoCurrentTime();
+        player.off('play');
+        player.off('ended');
+        player.off('playlistitem');
+
+
         player.playlist([]); // clear the default playlist, otherwise, when search again, the new playlist will be added to the old one
         player.playlist(myPlaylist);
 
         player.playlist.autoadvance(0);
-        // add hotkey function
-        player.ready(function () {
+
+        const video = player.tech().el();
+
+
+        function firstPlayHandler() {
+
+          video.classList.remove('fade-in');
+          void video.offsetWidth;
+          video.classList.add('fade-in');
+          // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
+          // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
+          video.style.setProperty('--fade-duration', '2s')
+          localStorage.setItem('isRunningFirstPlayHandler',true)
+          // After 2 seconds, set it to false
+          setTimeout(() => {
+            localStorage.setItem("isRunningFirstPlayHandler", "false");
+          }, 2000);
+          console.log('Play event fired (first time)!');
+        }
+
+        function normalPlayHandler() {
+          
+
+          video.classList.remove('fade-in');
+          void video.offsetWidth;
+          video.classList.add('fade-in');
+          video.style.setProperty('--fade-duration', '0.6s')
+          console.log('Play event fired (after firstplay)!');
+        }
+
+        player.on('play', function () {
+          const isAtVideoStart = player.currentTime() <= 0.5;
+
+          if (!hasHandledInitialPlay && isAtVideoStart) {
+            hasHandledInitialPlay = true;
+            firstPlayHandler();
+            return;
+          }
+
+          if (hasHandledInitialPlay) {
+            normalPlayHandler();
+          }
+        });
+
           // console.log("firstIE", localStorage.getItem("firstLoadingIe")) // still is "yes", after this time, it will be "no" dueto changing in extension, confirm there is only 1 time of adding
+          
+          console.log("ready ..")
           if (firstClickSearch == "yes") {
             firstClickSearch = "no"
             player.getChild("controlBar").addChild("PlayNextButton", {}, 1);
@@ -593,7 +772,7 @@
               },
             },
           });
-        });
+
 
         // setup volume control
         // 2. Add custom wheel event ONLY to your specific element
@@ -635,12 +814,14 @@
         player.on("ended", function () {
           currentEp =
             player.playlistMenu.items[player.playlist.currentItem()].item;
-          // console.log("Current item has finished playing:", currentEp.fullname);
+          console.log("Current item has finished playing:", currentEp.fullname);
           queryToIncreaseWatched(currentEp.fullname, keyword);
 
           // Your code here
         });
         player.on("playlistitem", function () {
+
+          hasHandledInitialPlay = false;
           console.log("playlist item changed");
           currentEp =
             player.playlistMenu.items[player.playlist.currentItem()].item;
@@ -648,60 +829,16 @@
           // 1. handle note editor
           document.title = currentEp.fullname;
           document.querySelector("#video_title").textContent = document.title;
-          const regex = new RegExp(keyword, "i"); // case-insensitive
 
-          // 2. move the the correct timestamp
-          if (
-            currentEp.patterns != "" &&
-            currentEp.patterns != undefined &&
-            currentEp.patterns != null &&
-            currentEp.patterns != "None"
-          ) {
-            patternsData = currentEp.patterns.replaceAll("\'", '"');
-            timestamps = JSON.parse(patternsData);
-            console.log("current ep patterns data", timestamps);
-            console.log("current time of player", player.currentTime());
-            timestamps.some((item) => {
-              // only use some because forEach not allow break
-              console.log(
-                "check pattern",
-                item.pattern,
-                "with keyword",
-                keyword,
-              );
-              if (regex.test(item.pattern)) {
-                // if (item.pattern.includes(keyword)) {
-                player.currentTime(
-                  item.timestamp
-                    .split(":")
-                    .reduce((acc, time) => 60 * acc + +time),
-                );
-                console.log(
-                  "jump to timestamp",
-                  item.timestamp,
-                  "with pattern",
-                  item.pattern,
-                );
-                return true;
-              }
-              return false;
-            });
-          }
-
-          // handle overlay, currently is intergrating to oshi already, for using with toomva and udemy also
-          // handleOverlay();
           // handle disable philo and enable timestamp monitor.
           handleDisablePhilo();
-          // remove this class to make the display: none get effected
-          if (localStorage.getItem("phone") == "yes") {
-            handleRemoveTitlebar();
-            // when 'injected stylesheet' mean: that .css is from a physical style.css but it is not from extension scope, not in current real.
-          }
-          // else {
-          //   handleRemoveTitlebar();
-          // }
-          // console.log(document.querySelector("#timestamp-title-bar"));
+
         });
+
+
+        });
+
+  
 
         // todo: import caption when confirm the subtitles are .srt format
         // await importCaption();
@@ -709,9 +846,22 @@
     </script>
 
     <script>
-      pattern_love = /[a-zA-Z]+\d{1,2}/i;
 
-      concate_pattern_love = /`$|` e\s{0,2},.*|` e$|` b\s{0,2},.*|` b$/i;
+
+
+      // |||| import these info into oshistamp also ||||
+
+      let pattern_love = /[a-zA-Z]+\d{1,2}/i;
+
+      let concate_pattern_love = /`$|` begin\s{0,2},.*|` begin$|` end\s{0,2},.*|` end$|` e\s{0,2},.*|` e$|` b\s{0,2},.*|` b$/i;
+      let important_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)important(?:\\s{0,3}[,\\n]|$)", 'i')  //this is the patterns get from fromOriginalToSegmentations.py to avoid "this is a long important text " is also captured in important region
+      let action_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)action(?:\\s{0,3}[,\\n]|$)", 'i')
+
+      // let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");   => will be used in .sort alogrithm
+
+      // |||| import these info into oshistamp also ||||
+
+
 
       const disablePhiloCheckbox = document.querySelector(
         "#disable-philo-checkbox",
@@ -750,8 +900,6 @@
 
       let firstLoadingIe = "yes"; // declare this variable outside of the function to make it accessible globally
       let firstClickSearch = "yes"; //, is used to avoid the Playnext button is added every Search button is clicked
-      important_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)important(?:\\s{0,3}[,\\n]|$)", 'i')  //this is the patterns get from fromOriginalToSegmentations.py to avoid "this is a long important text " is also captured in important region
-      action_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)action(?:\\s{0,3}[,\\n]|$)", 'i')
 
       let keyword = ""; //global declaration
       // this function will work if change Disable philo Or when playlistitemchanged.
@@ -879,11 +1027,13 @@
         // Both methods retrieve the current search term
         // range is a must, but maybe no need to fill in search box, if not exist, will fill a range that is so large: 1 - 1000
         if (keyword != "") {
+          localStorage.setItem("context","segmentations")
           // This is for review steps at segmentations, notice the <a> tag
           document.querySelector("#owner-name > a").textContent =
             "A consistency mind can change everything";
           window.channelName = "A consistency mind can change everything";
         } else {
+          localStorage.setItem("context","original")
           document.querySelector("#owner-name > a").textContent =
             "Life is an adventure"; //must exist to avoid the current page are in consistency.. but press Enter for keyword == "", then it will keep this title and classify data to wrong channel
           window.channelName = "Life is an adventure"; // use the channelName for create the timestamp when in extension when it still not defined, although channelName is captured in somewhere but at that local function maybe it still not defined.
@@ -909,8 +1059,7 @@
 
         const value = document.querySelector("#site-search").value.trim();
         mainThread(
-          value,
-          keyword,
+          value,          
           parseInt(searchMin),
           parseInt(searchMax),
           series.value,
