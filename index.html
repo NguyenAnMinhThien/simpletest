@@ -432,12 +432,18 @@
         let newQuerryArray = [];
 
 
-
-
-        if (document.querySelector("#revert").checked) { 
-          let removeOrKeepCategories = document.querySelector("#remove-categories").value
+        // there are 4 categories: important, action, consider, ignore. they will be filtered out depend on the remove box. If the remove box is empty then all will be kept.
+        let removeOrKeepCategories = document.querySelector("#remove-categories").value
           .split(",")
           .map((item) => item.trim().toLowerCase());
+        
+        if (removeOrKeepCategories.includes('consider')) {
+          removeOrKeepCategories.push('here')
+          // because 2 types consider' and here' is the same: here will tell this ep already fix from begin while consider tell maybe some previous position still not note correctly
+        }
+
+        if (document.querySelector("#revert").checked) { 
+
 
           removeOrKeepCategories.forEach((category) => {
             const categoryPattern = new RegExp(
@@ -462,10 +468,7 @@
           querryArray = newQuerryArray
         }
         else {
-        // there are 4 categories: important, action, consider, ignore. they will be filtered out depend on the remove box. If the remove box is empty then all will be kept.
-        let removeOrKeepCategories = document.querySelector("#remove-categories").value
-          .split(",")
-          .map((item) => item.trim().toLowerCase());
+        
 
           removeOrKeepCategories.forEach((category) => {
             const categoryPattern = new RegExp(
