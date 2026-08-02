@@ -169,7 +169,55 @@
   //     waitForVideoAndAttach(0);
   //   }
   // }
+        let hasHandledInitialPlay = false;
 
+        function triggerCssAnimation () {
+          
+                const video = player.tech().el();
+
+
+                function firstPlayHandler() {
+
+                  video.classList.remove('fade-in');
+                  void video.offsetWidth;
+                  video.classList.add('fade-in');
+                  // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
+                  // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
+                  video.style.setProperty('--fade-duration', '2s')
+                  localStorage.setItem('isRunningFirstPlayHandler',true)
+                  // After 2 seconds, set it to false
+                  setTimeout(() => {
+                    localStorage.setItem("isRunningFirstPlayHandler", "false");
+                  }, 2000);
+                  console.log('Play event fired (first time)!');
+                }
+
+                function normalPlayHandler() {
+                  
+
+                  video.classList.remove('fade-in');
+                  void video.offsetWidth;
+                  video.classList.add('fade-in');
+                  video.style.setProperty('--fade-duration', '0.6s')
+                  console.log('Play event fired (after firstplay)!');
+                }
+
+                player.on('play', function () {
+                  const isAtVideoStart = player.currentTime() <= 0.5;
+
+                  if (!hasHandledInitialPlay && isAtVideoStart) {
+                    hasHandledInitialPlay = true;
+                    firstPlayHandler();
+                    return;
+                  }
+
+                  if (hasHandledInitialPlay) {
+                    normalPlayHandler();
+                  }
+                }
+              
+              );
+        }
 
       function handleDisablePhilo() {
         var t = 0,
@@ -654,7 +702,6 @@
         }
         
 
-        let hasHandledInitialPlay = false;
 
         // generate the PlayNextButton component
         const Button = videojs.getComponent("Button");
@@ -705,49 +752,8 @@
         player.playlist(myPlaylist);
 
         player.playlist.autoadvance(0);
+        triggerCssAnimation();
 
-        const video = player.tech().el();
-
-
-        function firstPlayHandler() {
-
-          video.classList.remove('fade-in');
-          void video.offsetWidth;
-          video.classList.add('fade-in');
-          // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
-          // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
-          video.style.setProperty('--fade-duration', '2s')
-          localStorage.setItem('isRunningFirstPlayHandler',true)
-          // After 2 seconds, set it to false
-          setTimeout(() => {
-            localStorage.setItem("isRunningFirstPlayHandler", "false");
-          }, 2000);
-          console.log('Play event fired (first time)!');
-        }
-
-        function normalPlayHandler() {
-          
-
-          video.classList.remove('fade-in');
-          void video.offsetWidth;
-          video.classList.add('fade-in');
-          video.style.setProperty('--fade-duration', '0.6s')
-          console.log('Play event fired (after firstplay)!');
-        }
-
-        player.on('play', function () {
-          const isAtVideoStart = player.currentTime() <= 0.5;
-
-          if (!hasHandledInitialPlay && isAtVideoStart) {
-            hasHandledInitialPlay = true;
-            firstPlayHandler();
-            return;
-          }
-
-          if (hasHandledInitialPlay) {
-            normalPlayHandler();
-          }
-        });
 
           // console.log("firstIE", localStorage.getItem("firstLoadingIe")) // still is "yes", after this time, it will be "no" dueto changing in extension, confirm there is only 1 time of adding
           
@@ -764,6 +770,7 @@
             player.off('play');
             player.off('ended');
             player.off('playlistitem');
+            triggerCssAnimation();
           }
           this.hotkeys({
             volumeStep: 0.1,
