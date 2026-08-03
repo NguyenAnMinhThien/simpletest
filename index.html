@@ -909,7 +909,7 @@
       const max = document.querySelector("#max");
       const series = document.querySelector("#series");
       const keywordbox = document.querySelector("#keywordbox");
-      keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\d{1,2}" : ""; //if this is phone, then assign a specific value
+      keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\\d{1,2}" : ""; //if this is phone, then assign a specific value
       function insertTextAtCursor(target, text) {
         if (!target) {
           return;
