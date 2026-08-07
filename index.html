@@ -57,6 +57,9 @@
     </div>
     <div>  
         <input id="subtractOshi" placeholder="subtract.." value="2"/> 
+      <label style="background-color: #5a3bf6;">
+        <input id="autoImport" type="checkbox"  /> Auto Import
+      </label>
         <input id="remove-categories"  placeholder="remove categories: ignore, consider, important, action" value="ignore,consider"/> 
               <label>
         <input id="revert" type="checkbox" /> Revert
@@ -277,10 +280,10 @@
 
       async function queryToBackend(movieName, range) {
         try {
-          // var urlQuery = new URL("http://192.168.1.200:3000/query");
-          var urlQuery = new URL(
-            "https://backend-210398985503.europe-west1.run.app/query",
-          );
+          var urlQuery = new URL("http://192.168.1.200:3000/query");
+          // var urlQuery = new URL(
+          //   "https://backend-210398985503.europe-west1.run.app/query",
+          // );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
@@ -305,13 +308,13 @@
         //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
-          // var urlQuery = new URL(
-          //   "http://192.168.1.200:7777",
-          // );
-
           var urlQuery = new URL(
-            "https://backendincreasewatched-210398985503.europe-west1.run.app",
+            "http://192.168.1.200:7777",
           );
+
+          // var urlQuery = new URL(
+          //   "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          // );
 
           urlQuery.searchParams.set("epname", epname);
 
@@ -848,7 +851,9 @@
           currentEp =
             player.playlistMenu.items[player.playlist.currentItem()].item;
           console.log("Current item has finished playing:", currentEp.fullname);
-          queryToIncreaseWatched(currentEp.fullname, keyword);
+          // queryToIncreaseWatched(currentEp.fullname, keyword);
+          // -> deprecating, will move to oshi
+
 
           // Your code here
         });
@@ -902,7 +907,12 @@
       const disableQuillCheckbox = document.querySelector(
         "#disable-quill",
       );
+      const autoImport = document.querySelector(
+        "#autoImport",
+      );
       disableQuillCheckbox.checked = screen.width < 1000;
+      // autoImport.checked = screen.width < 1000;
+      autoImport.checked = true;
 
       const searchButton = document.querySelector("#search-button");
       const min = document.querySelector("#min");
@@ -1068,13 +1078,13 @@
         // Both methods retrieve the current search term
         // range is a must, but maybe no need to fill in search box, if not exist, will fill a range that is so large: 1 - 1000
         if (keyword != "") {
-          localStorage.setItem("context","segmentations")
+          // localStorage.setItem("context","segmentations") // using context here make the local variable is shared between tabs and raise bug between them.
           // This is for review steps at segmentations, notice the <a> tag
           document.querySelector("#owner-name > a").textContent =
             "A consistency mind can change everything";
           window.channelName = "A consistency mind can change everything";
         } else {
-          localStorage.setItem("context","original")
+          // localStorage.setItem("context","original")
           document.querySelector("#owner-name > a").textContent =
             "Life is an adventure"; //must exist to avoid the current page are in consistency.. but press Enter for keyword == "", then it will keep this title and classify data to wrong channel
           window.channelName = "Life is an adventure"; // use the channelName for create the timestamp when in extension when it still not defined, although channelName is captured in somewhere but at that local function maybe it still not defined.
