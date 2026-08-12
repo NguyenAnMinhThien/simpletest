@@ -72,7 +72,7 @@ body {
   /* Vertical centering */
 }
 
-#video {
+#video, #video-background {
   width: cal(100vw - 60px);
   /* this height is important because if use 100vh - 80px, it will appear a scroll bar, because the height of this element has touch to the height of player-container itself */
   height: calc(100vh - 85px) !important;
@@ -131,6 +131,97 @@ body {
 
 @keyframes fadeIn {
   from { opacity: 0; }
-  to   { opacity: 1; }
+  to   { opacity: var(--fade-opacity, 1); }
 }
 
+
+
+#hover-btn {
+  padding: 0.5rem 1rem;
+  /* background: #eee200; */
+  background: transparent;
+  color: white;
+  border: none;
+  /* border-radius: 25%; */
+  cursor: pointer;
+  /* margin-right: 1rem; */
+}
+
+#slider-container {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 0;
+  /* collapsed by default */
+  opacity: 0;
+  transform: translateX(-5px);
+  transition:
+    max-width 0.4s ease,
+    opacity 0.4s ease,
+    transform 0.4s ease;
+  vertical-align: middle;
+}
+
+#slider-container.visible {
+  max-width: 300px;
+  /* expand to fit slider */
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#mySlider {
+  display: inline-block;
+  display: flex;
+  justify-content: center;
+  /* centers horizontally */
+  align-items: center;
+  /* centers vertically */
+}
+
+
+#hover-btnBg {
+  /* padding: 0.5rem 1rem; */
+  /* background: #eee200; */
+
+  background: transparent;
+  color: white;
+  border: none;
+  /* border-radius: 25%; */
+  cursor: pointer;
+  /* margin-right: 1rem; */
+}
+
+#slider-containerBg {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 0;
+  /* collapsed by default */
+  opacity: 0;
+  transform: translateX(-5px);
+  transition:
+    max-width 0.4s ease,
+    opacity 0.4s ease,
+    transform 0.4s ease;
+  vertical-align: middle;
+}
+
+#slider-containerBg.visible {
+  max-width: 300px;
+  /* expand to fit slider */
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#mySliderBg {
+  display: inline-block;
+  display: flex;
+  justify-content: center;
+  /* centers horizontally */
+  align-items: center;
+  /* centers vertically */
+  /* padding-bottom: 50px;
+        margin-bottom: 30px;  these code just define the out border of the element, if want to, need to define the bottom */
+}
+
+md-slider {
+  min-inline-size: 100px;
+}

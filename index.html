@@ -12,83 +12,84 @@
       rel="stylesheet"
     />
 
-
     <link href="examples.css" rel="stylesheet" />
   </head>
   <body>
-    <div>
-      <input id="site-search" placeholder="Movie..." />
-      <!-- <input id="keywordbox" placeholder="keyword.." /> -->
-      <input id="keywordbox" list="selection" name="myBrowser" /></label>
-            <datalist id="selection">
-        
-     <select name="browser-fallback">
-              <option value="[a-zA-Z]+\d{1,2}"></option>
+    <div id="mainOutbox">
+      <div>
+        <input id="site-search" placeholder="Movie..." />
+        <!-- <input id="keywordbox" placeholder="keyword.." /> -->
+        <input id="keywordbox" list="selection" name="myBrowser" />
+        <datalist id="selection">
+          <select name="browser-fallback">
+            <option value="[a-zA-Z]+\d{1,2}"></option>
+          </select>
+        </datalist>
 
-  </select>
+        <span aria-label="Insert special characters">
+          <button type="button" data-insert-value="Clear">Clear</button>
+          <button type="button" data-insert-value="|">|</button>
+          <button type="button" data-insert-value="{">{</button>
+          <button type="button" data-insert-value="}">}</button>
+          <button type="button" data-insert-value="\">\</button>
+          <button type="button" data-insert-value="[">[</button>
+          <button type="button" data-insert-value="]">]</button>
+        </span>
 
-      </datalist>
+        <input id="min" placeholder="min.." style="width: 100px" />
+        <input id="max" placeholder="max.." style="width: 100px" />
+        <input id="series" placeholder="series.." style="width: 80px" />
+        <label>
+          <input id="disable-philo-checkbox" type="checkbox" /> Disable philo
+        </label>
 
-      <span aria-label="Insert special characters">
-        <button type="button" data-insert-value="Clear">Clear</button>
-        <button type="button" data-insert-value="|">|</button>
-        <button type="button" data-insert-value="{">{</button>
-        <button type="button" data-insert-value="}">}</button>
-        <button type="button" data-insert-value="\">\</button>
-        <button type="button" data-insert-value="[">[</button>
-        <button type="button" data-insert-value="]">]</button>
-      </span>
-
-
-      <input id="min" placeholder="min.." style="width: 100px;"/>
-      <input id="max" placeholder="max.." style="width: 100px;"/>
-      <input id="series" placeholder="series.." style="width: 80px;" />
-      <label>
-        <input id="disable-philo-checkbox" type="checkbox" /> Disable philo
-      </label>
-
-      <label>
-        <input id="disable-quill" type="checkbox" /> Disable quill
-      </label>
-      <label>
-        <input id="watched" type="checkbox" /> Watched
-      </label>
-      <button id="search-button">Search</button>
-    </div>
-    <div>  
-        <input id="subtractOshi" placeholder="subtract.." value="2"/> 
-      <label style="background-color: #5a3bf6;">
-        <input id="autoImport" type="checkbox"  /> Auto Import
-      </label>
-        <input id="remove-categories"  placeholder="remove categories: ignore, consider, important, action" value="ignore,consider"/> 
-              <label>
-        <input id="revert" type="checkbox" /> Revert
-      </label>
+        <label>
+          <input id="disable-quill" type="checkbox" /> Disable quill
+        </label>
+        <label> <input id="watched" type="checkbox" /> Watched </label>
+        <button id="search-button">Search</button>
+        <button id="scroll-to-background" type="button">Go Background</button>
       </div>
+      <div>
+        <input id="subtractOshi" placeholder="subtract.." value="2" />
+        <label style="background-color: #5a3bf6">
+          <input id="autoImport" type="checkbox" /> Auto Import
+        </label>
+        <input
+          id="remove-categories"
+          placeholder="remove categories: ignore, consider, important, action"
+          value="ignore,consider"
+        />
+        <label> <input id="revert" type="checkbox" /> Revert </label>
+        <div
+          style="
+            display: inline-block;
+            position: absolute;
+            right: 20px;
+            margin: 0 0 20px;
+          "
+        >
+          <span> Opacity of Main: </span>
+          <span id="opacityMain"></span>
+        </div>
+      </div>
+    </div>
 
     <div class="player-container" id="movie_player">
-      <!-- turn off autoplay="false" to allow the slack on beginning when conflict with oshi-->
-       <!-- opacity: 0; transition: opacity 1s ease-in-out;  -->
-        <!-- style="opacity: 0;" -->
       <video
         id="video"
         class="video-js"
         controls
         autoplay
         crossorigin="anonymous"
-        
-        
-      >
-        <!-- <source src="http://vjs.zencdn.net/v/oceans.mp4" type="video/mp4" />
-        <source src="http://vjs.zencdn.net/v/oceans.webm" type="video/webm" /> -->
-      </video>
-
+      ></video>
       <div class="vjs-playlist">
         <!--
         The contents of this element will be filled based on the
         currently loaded playlist
       --></div>
     </div>
+
     <!-- this ytd-watch-flexy is for observer the changing to tell note extension update the quillEditor -->
     <ytd-watch-flexy>
       <h1 id="video_title">Title of movie</h1>
@@ -103,124 +104,155 @@
     This is the default text inside the box.
     </textarea>
 
+    <!-- ----*--*---- -->
+    <div id="background-Outbox">
+      <div>
+        <input id="background-site-search" placeholder="Movie..." />
+        <!-- <input id="background-keywordbox" placeholder="keyword.." /> -->
+        <input
+          id="background-keywordbox"
+          list="background-selection"
+          name="myBrowser"
+        />
+        <datalist id="background-selection">
+          <select name="browser-fallback">
+            <option value="[a-zA-Z]+\d{1,2}"></option>
+          </select>
+        </datalist>
+
+        <span aria-label="Insert special characters">
+          <button type="button" data-insert-value="Clear">Clear</button>
+          <button type="button" data-insert-value="|">|</button>
+          <button type="button" data-insert-value="{">{</button>
+          <button type="button" data-insert-value="}">}</button>
+          <button type="button" data-insert-value="\">\</button>
+          <button type="button" data-insert-value="[">[</button>
+          <button type="button" data-insert-value="]">]</button>
+        </span>
+
+        <input id="background-min" placeholder="min.." style="width: 100px" />
+        <input id="background-max" placeholder="max.." style="width: 100px" />
+        <input
+          id="background-series"
+          placeholder="series.."
+          style="width: 80px"
+        />
+
+        <label>
+          <input id="background-watched" type="checkbox" /> Watched
+        </label>
+        <button id="background-search-button">Search</button>
+        <button id="scroll-to-main" type="button">Go Main</button>
+      </div>
+      <div>
+        <input
+          id="background-remove-categories"
+          placeholder="remove categories: ignore, consider, important, action"
+          value="ignore,consider"
+        />
+        <label> <input id="background-revert" type="checkbox" /> Revert </label>
+      </div>
+    </div>
+
+    <div class="player-container" style="background-color: blue">
+      <video
+        id="video-background"
+        class="video-js"
+        controls
+        autoplay
+        crossorigin="anonymous"
+      ></video>
+      <div class="vjs-playlist">
+        <!--
+        The contents of this element will be filled based on the
+        currently loaded playlist
+      --></div>
+    </div>
+    <h1 id="background-video_title">Title of movie Background</h1>
+
+    <div id="mergeDiv">
+      <button id="zIndexMain" style="cursor: pointer">📒</button>
+      <button id="zIndexBg" style="cursor: pointer">📄</button>
+      <button type="button" id="Merge">Merge 2 player</button>
+      <div id="mySlider">
+        <button id="hover-btn">📀</button>
+        <div id="slider-container">
+          <!-- in merge mode, this value is changed -->
+          <md-slider min="0" max="100" value="100"></md-slider>
+        </div>
+      </div>
+
+      <div id="mySliderBg">
+        <button id="hover-btnBg">💿</button>
+        <div id="slider-containerBg">
+          <md-slider min="0" max="100" value="100"></md-slider>
+        </div>
+      </div>
+      <!-- use lablel to connect with oshi main opacity when fade-in/ out -->
+    </div>
     <script src="//cdn.jsdelivr.net/npm/video.js@8.23.7/dist/video.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/videojs-playlist@5.2.0/dist/videojs-playlist.min.js"></script>
     <!-- <script src="node_modules/videojs-overlay/dist/videojs-overlay.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/videojs-playlist-ui@5.0.0/dist/videojs-playlist-ui.min.js"></script>
 
     <script src="//cdn.sc.gl/videojs-hotkeys/0.2/videojs.hotkeys.min.js"></script>
+    <script
+      type="module"
+      src="https://esm.run/@material/web/slider/slider.js"
+    ></script>
 
     <script>
-    //  function monitorVideoCurrentTime() {
-    // // Use native media events to monitor currentTime changes. Replacing the
-    // // `watch` polyfill avoids overriding the native `currentTime` accessor,
-    // // which can prevent the browser from performing actual seeks.
-    // if (typeof document === "undefined") return;
+      let hasHandledInitialPlay = false;
 
-    // var video = document.querySelector("video");
+      function triggerCssAnimation(player) {
+        const video = player.tech().el();
 
-    // function attachListeners(v) {
-    //   if (!v) return;
-    //   var lastTime = typeof v.currentTime === "number" ? v.currentTime : 0;
-
-    //   v.addEventListener("timeupdate", function () {
-    //     try {
-    //       if (v.currentTime !== lastTime) {
-    //         console.log(
-    //           "video currentTime changed:",
-    //           lastTime,
-    //           "=>",
-    //           v.currentTime,
-    //         );
-    //         lastTime = v.currentTime;
-    //       }
-    //     } catch (e) {
-    //       console.error("timeupdate handler error:", e);
-    //     }
-    //   });
-
-    //   v.addEventListener("seeking", function () {
-    //     console.log("video seeking to:", v.currentTime);
-    //     console.trace("hey..",v.currentTime)
-    //   });
-
-    //   v.addEventListener("seeked", function () {
-    //     console.log("video seeked to:", v.currentTime);
-    //     lastTime = v.currentTime;
-    //   });
-    // }
-
-  //   function waitForVideoAndAttach(retries) {
-  //     retries = retries || 0;
-  //     video = document.querySelector("video");
-  //     if (video) {
-  //       attachListeners(video);
-  //       return true;
-  //     }
-  //     if (retries > 20) return false;
-  //     setTimeout(function () {
-  //       waitForVideoAndAttach(retries + 1);
-  //     }, 250);
-  //     return false;
-  //   }
-
-  //   if (document.readyState === "loading") {
-  //     document.addEventListener("DOMContentLoaded", function () {
-  //       waitForVideoAndAttach(0);
-  //     });
-  //   } else {
-  //     waitForVideoAndAttach(0);
-  //   }
-  // }
-        let hasHandledInitialPlay = false;
-
-        function triggerCssAnimation () {
-          
-                const video = player.tech().el();
-
-
-                function firstPlayHandler() {
-
-                  video.classList.remove('fade-in');
-                  void video.offsetWidth;
-                  video.classList.add('fade-in');
-                  // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
-                  // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
-                  video.style.setProperty('--fade-duration', '2s')
-                  localStorage.setItem('isRunningFirstPlayHandler',true)
-                  // After 2 seconds, set it to false
-                  setTimeout(() => {
-                    localStorage.setItem("isRunningFirstPlayHandler", "false");
-                  }, 2000);
-                  console.log('Play event fired (first time)!');
-                }
-
-                function normalPlayHandler() {
-                  
-
-                  video.classList.remove('fade-in');
-                  void video.offsetWidth;
-                  video.classList.add('fade-in');
-                  video.style.setProperty('--fade-duration', '0.6s')
-                  console.log('Play event fired (after firstplay)!');
-                }
-
-                player.on('play', function () {
-                  const isAtVideoStart = player.currentTime() <= 0.5;
-
-                  if (!hasHandledInitialPlay && isAtVideoStart) {
-                    hasHandledInitialPlay = true;
-                    firstPlayHandler();
-                    return;
-                  }
-
-                  if (hasHandledInitialPlay) {
-                    normalPlayHandler();
-                  }
-                }
-              
-              );
+        function firstPlayHandler() {
+          video.classList.remove("fade-in");
+          void video.offsetWidth;
+          video.classList.add("fade-in");
+          // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
+          // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
+          video.style.setProperty("--fade-duration", "2s");
+          // Set final opacity
+          video.style.setProperty(
+            "--fade-opacity",
+            document.getElementById("opacityMain").textContent,
+          );
+          localStorage.setItem("isRunningFirstPlayHandler", true);
+          // After 2 seconds, set it to false
+          setTimeout(() => {
+            localStorage.setItem("isRunningFirstPlayHandler", "false");
+          }, 2000);
+          console.log("Play event fired (first time)!");
         }
+
+        function normalPlayHandler() {
+          video.classList.remove("fade-in");
+          void video.offsetWidth;
+          video.classList.add("fade-in");
+          video.style.setProperty("--fade-duration", "0.6s");
+          video.style.setProperty(
+            "--fade-opacity",
+            document.getElementById("opacityMain").textContent,
+          );
+          console.log("Play event fired (after firstplay)!");
+        }
+
+        player.on("play", function () {
+          const isAtVideoStart = player.currentTime() <= 0.5;
+
+          if (!hasHandledInitialPlay && isAtVideoStart) {
+            hasHandledInitialPlay = true;
+            firstPlayHandler();
+            return;
+          }
+
+          if (hasHandledInitialPlay) {
+            normalPlayHandler();
+          }
+        });
+      }
 
       function handleDisablePhilo() {
         var t = 0,
@@ -243,42 +275,7 @@
         setTimeout(n, 300);
       }
 
-      function removeTitleBar() {
-        document
-          .querySelector("#timestamp-title-bar")
-          .classList.remove("d-flex");
-        document.querySelector("#timestamp-title-bar").style.cssText =
-          "display: none !important;";
-        document.querySelector("#timestamp-container").style.height =
-          document.querySelector("#timestamp-container").offsetHeight -
-          20 +
-          "px";
-        qlEditor = document.querySelector("#timestamp-content");
-        qlEditor.style.cssText = "height: calc(100% - 2px) !important;";
-      }
-      
-      function isFocused() {
-        var qlEditor = document.querySelector(".ql-editor");
-        var videoElement = document.querySelector("video");
-        console.log(
-          "Is Quill editor focused?",
-          document.activeElement === qlEditor,
-        );
-
-        console.log(
-          "Is video element focused?",
-          document.activeElement === videoElement,
-        );
-        // return document.activeElement === qlEditor;
-        setTimeout(isFocused, 2000);
-      }
-
-      function transferVideoelement() {
-        var videoElement = document.querySelector("video");
-        videoElement.focus();
-      }
-
-      async function queryToBackend(movieName, range) {
+      async function queryToBackend(movieName, range, keyword, series) {
         try {
           // var urlQuery = new URL("http://192.168.1.200:3000/query");
           var urlQuery = new URL(
@@ -288,7 +285,7 @@
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
           urlQuery.searchParams.set("keyword", keyword);
-          urlQuery.searchParams.set("series", series.value);
+          urlQuery.searchParams.set("series", series);
           urlQuery.searchParams.set("apikey", localStorage.getItem("apikey")); //heree
 
           // const response = await fetch(
@@ -304,26 +301,56 @@
         }
       }
 
-      async function queryToIncreaseWatched(epname, keyword) {
+      var updatedContentColor = ""; // just to bypass the below function
+      async function queryToIncreaseWatchedContent(
+        epname,
+        keyword,
+        content,
+        autoImport,
+        platform,
+      ) {
         //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
-          // var urlQuery = new URL(
-          //   "http://192.168.1.200:7777",
-          // );
+          // var urlQuery = new URL("http://192.168.1.200:7777");
 
           var urlQuery = new URL(
             "https://backendincreasewatched-210398985503.europe-west1.run.app",
           );
 
-          urlQuery.searchParams.set("epname", epname);
+          const payload = {
+            epname: epname,
+            keyword: keyword,
+            content: content,
+            autoImport: autoImport,
+            platform: platform,
+          };
 
-          urlQuery.searchParams.set("keyword", keyword);
-
-          const response = await fetch(urlQuery);
+          const response = await fetch(urlQuery, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
           const data = await response.text();
+          if (
+            data.toLowerCase().includes("success") &&
+            data.toLowerCase().includes("updated content") &&
+            data.toLowerCase().includes("updated patterns")
+          ) {
+            updatedContentColor = "green";
+          } else if (
+            data.toLowerCase().includes("success") &&
+            data.toLowerCase().includes("updated pattern")
+          ) {
+            updatedContentColor = "yellow";
+          } else {
+            updatedContentColor = "red";
+          }
+
           console.log(
-            "This is in async function, so can print in anytime, just for debugging:",
+            "This is in async function, so can print in anytime, just for debugging On secondary:",
             data,
           );
           // console.trace("where this is called")
@@ -333,8 +360,15 @@
           console.error("Fetch failed:", error);
         }
       }
-
-      function Eposide(name, url, content, subtitlePaths, Additional2, Additional4) {
+      function Eposide(
+        name,
+        url,
+        content,
+        subtitlePaths,
+        Additional2,
+        Additional4,
+        keyword,
+      ) {
         textTractArray = [];
         subtitlePaths.forEach((item, index) => {
           textTractArray.push({
@@ -346,8 +380,16 @@
         });
 
         // |||||||| duplicated this in .sort alogrithm in video playlist
-        let isImportant = (content != null && important_pattern.test(content.toLowerCase().trim()) && !Additional4.includes('notimportant')) || Additional4.includes('important')
-        let isAction = (content != null && action_pattern.test(content.toLowerCase().trim()) && !Additional4.includes('notaction')) || Additional4.includes('action')
+        let isImportant =
+          (content != null &&
+            important_pattern.test(content.toLowerCase().trim()) &&
+            !Additional4.includes("notimportant")) ||
+          Additional4.includes("important");
+        let isAction =
+          (content != null &&
+            action_pattern.test(content.toLowerCase().trim()) &&
+            !Additional4.includes("notaction")) ||
+          Additional4.includes("action");
         // |||||||| duplicated this in .sort alogrithm in video playlist
 
         if (isImportant) {
@@ -364,7 +406,8 @@
         //     : ""; // only segmentations exist keyword and Additional2 for watched monitor. the \n not appear new line in this case.
 
         // any case watched still exist
-        var watched = " Watched " + getMinWatched(keyword, { Additional2: Additional2 }) ;
+        var watched =
+          " Watched " + getMinWatched(keyword, { Additional2: Additional2 });
         return {
           // todo: fix here, Additional2 currently not appear on full Ep
           name: "EP" + name.split("_EP").at(-1).split("_")[0] + watched,
@@ -414,8 +457,8 @@
       let AllPatternCanExistFromRegexMovie = ""; // declare this variable outside of the function to make it accessible globally if needed
       let patternsInSearchBox = [];
 
-      function updatePatternOptionsFromText(text) {
-        const datalist = document.getElementById("selection");
+      function updatePatternOptionsFromText(text, selectionIdDatalist) {
+        const datalist = document.getElementById(selectionIdDatalist);
         if (!datalist) {
           return;
         }
@@ -444,11 +487,18 @@
         });
       }
 
-      async function createPlaylist(movieName, range) {
+      async function createPlaylist(
+        movieName,
+        range,
+        keyword,
+        series,
+        allPackages,
+      ) {
         subtitlePaths = [];
         arraySource = [];
         console.log("before query", movieName, range, keyword);
-        let data = await queryToBackend(movieName, range);
+
+        let data = await queryToBackend(movieName, range, keyword, series);
         let querryArray = data.final_rows;
 
         AllPatternCanExistFromRegexMovie = "";
@@ -472,9 +522,16 @@
           AllPatternCanExistFromRegexMovie =
             "No existed, please add at additional info page";
         }
-        document.getElementById("AllPatterns").value =
-          AllPatternCanExistFromRegexMovie;
-        updatePatternOptionsFromText(AllPatternCanExistFromRegexMovie);
+        if (allPackages.videoContainerId == "video") {
+          // // only handle for the main video .
+          document.getElementById("AllPatterns").value =
+            AllPatternCanExistFromRegexMovie;
+        }
+
+        updatePatternOptionsFromText(
+          AllPatternCanExistFromRegexMovie,
+          allPackages.selectionId,
+        );
 
         console.log("success query to backend", querryArray);
 
@@ -482,142 +539,131 @@
         querryArray.sort((a, b) => a.ep - b.ep);
         let newQuerryArray = [];
 
-
         // there are 4 categories: important, action, consider, ignore. they will be filtered out depend on the remove box. If the remove box is empty then all will be kept.
-        let removeOrKeepCategories = document.querySelector("#remove-categories").value
-          .split(",")
+        let removeOrKeepCategories = document
+          .getElementById(allPackages.categoryId)
+          .value.split(",")
           .map((item) => item.trim().toLowerCase());
-        
-        if (removeOrKeepCategories.includes('consider')) {
-          removeOrKeepCategories.push('here')
+
+        if (removeOrKeepCategories.includes("consider")) {
+          removeOrKeepCategories.push("here");
           // because 2 types consider' and here' is the same: here will tell this ep already fix from begin while consider tell maybe some previous position still not note correctly
         }
 
-        if (document.querySelector("#revert").checked) { 
-
-
+        if (document.getElementById(allPackages.revertId).checked) {
           removeOrKeepCategories.forEach((category) => {
             const categoryPattern = new RegExp(
               "(?:,\\s{0,2}|`\\s{0,2}|^)" + category + "(?:\\s{0,3}[,\\n]|$)",
               "i",
             );
             newMatchingArray = querryArray.filter((item) => {
-              item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
-              let contentItem = keyword != ""? item.content : item.fullContent;
+              item.Additional4 =
+                item.Additional4 == null ? [] : item.Additional4;
+              let contentItem = keyword != "" ? item.content : item.fullContent;
               const isCategoryPresent =
-                (contentItem != null && categoryPattern.test(contentItem.toLowerCase().trim()) &&
-                !item.Additional4.includes("not" + category)) || item.Additional4.includes(category);
+                (contentItem != null &&
+                  categoryPattern.test(contentItem.toLowerCase().trim()) &&
+                  !item.Additional4.includes("not" + category)) ||
+                item.Additional4.includes(category);
 
-       
-              console.log("this is the getting result:", item,"\n  ", isCategoryPresent)
-                  return isCategoryPresent;
-                
+              console.log(
+                "this is the getting result:",
+                item,
+                "\n  ",
+                isCategoryPresent,
+              );
+              return isCategoryPresent;
             });
             newQuerryArray.push(...newMatchingArray);
-
           });
-          querryArray = newQuerryArray
-        }
-        else {
-        
-
+          querryArray = newQuerryArray;
+        } else {
           removeOrKeepCategories.forEach((category) => {
             const categoryPattern = new RegExp(
               "(?:,\\s{0,2}|`\\s{0,2}|^)" + category + "(?:\\s{0,3}[,\\n]|$)",
               "i",
             );
             querryArray = querryArray.filter((item) => {
-              item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
-              let contentItem = keyword != ""? item.content : item.fullContent;
+              item.Additional4 =
+                item.Additional4 == null ? [] : item.Additional4;
+              let contentItem = keyword != "" ? item.content : item.fullContent;
               const isCategoryPresent =
-                (contentItem != null && categoryPattern.test(contentItem.toLowerCase().trim()) &&
-                !item.Additional4.includes("not" + category)) || item.Additional4.includes(category);
+                (contentItem != null &&
+                  categoryPattern.test(contentItem.toLowerCase().trim()) &&
+                  !item.Additional4.includes("not" + category)) ||
+                item.Additional4.includes(category);
 
-       
-              
-                  return !isCategoryPresent;
-                
+              return !isCategoryPresent;
             });
-          });}
-
-
-// querryArray.forEach((item, index) => {
-//   let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");
-//     item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
-
-//     const isConsider = (consider_pattern.test(item.content.toLowerCase().trim()) 
-//                         && !item.Additional4.includes('notconsider')) 
-//                         || item.Additional4.includes('consider');
-
-//     const isIgnore = (ignore_pattern.test(item.content.toLowerCase().trim()) 
-//                       && !item.Additional4.includes('notignore')) 
-//                       || item.Additional4.includes('ignore');
-
-//     if (isConsider || isIgnore) {
-//         querryArray.splice(index, 1);
-//     }
-// });
-
-
+          });
+        }
 
         // This is fixed content can be appear in playlist when it can be important, normal, action. Other will be filtered out depend on the remove box, if the remove is important then below will not appear important' so basicly the below code won't change.
-        if (document.querySelector('#watched').checked) {
-
+        if (document.getElementById(allPackages.watchedId).checked) {
           if (keyword != "") {
-          //only arrange the ep follow content in review mode
-          var importantContent = [];
-          var actionContent = [];
-          var removeItems = [];
+            //only arrange the ep follow content in review mode
+            var importantContent = [];
+            var actionContent = [];
+            var removeItems = [];
 
-          querryArray.forEach((item, index) => {
-            // the content need to contain important' key AND there is no 'notimportant' mark down in Additional4
-            // or in Additional4, it includes 'important' is also ok
-            item.Additional4 = item.Additional4 == null ? [] : item.Additional4
-            isImportant = (item.content != null && important_pattern.test(item.content.toLowerCase().trim())  && !item.Additional4.includes('notimportant')) || item.Additional4.includes('important')
-            isAction = (item.content != null &&  action_pattern.test(item.content.toLowerCase().trim())  && !item.Additional4.includes('notaction')) || item.Additional4.includes('action')
-            if (isImportant) {
-              importantContent.push(item);
-              removeItems.push(index);
-            } else if (isAction) {
-              actionContent.push(item);
-              removeItems.push(index);
-            }
-          });
-          querryArray = querryArray.filter(
-            (item, index) => !removeItems.includes(index),
-          );
+            querryArray.forEach((item, index) => {
+              // the content need to contain important' key AND there is no 'notimportant' mark down in Additional4
+              // or in Additional4, it includes 'important' is also ok
+              item.Additional4 =
+                item.Additional4 == null ? [] : item.Additional4;
+              isImportant =
+                (item.content != null &&
+                  important_pattern.test(item.content.toLowerCase().trim()) &&
+                  !item.Additional4.includes("notimportant")) ||
+                item.Additional4.includes("important");
+              isAction =
+                (item.content != null &&
+                  action_pattern.test(item.content.toLowerCase().trim()) &&
+                  !item.Additional4.includes("notaction")) ||
+                item.Additional4.includes("action");
+              if (isImportant) {
+                importantContent.push(item);
+                removeItems.push(index);
+              } else if (isAction) {
+                actionContent.push(item);
+                removeItems.push(index);
+              }
+            });
+            querryArray = querryArray.filter(
+              (item, index) => !removeItems.includes(index),
+            );
 
-          importantContent.sort(
-            (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
-          );
-          querryArray.sort(
-            (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
-          );
-          actionContent.sort(
-            (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
-          );
+            importantContent.sort(
+              (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+            );
+            querryArray.sort(
+              (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+            );
+            actionContent.sort(
+              (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+            );
 
-          querryArray = importantContent
-            .concat(querryArray)
-            .concat(actionContent);
-        }
-        else {
-          // fulfill null value of Additional4
-          querryArray.forEach((item, index) => {
-          item.Additional4 = item.Additional4 == null ? [] : item.Additional4});
+            querryArray = importantContent
+              .concat(querryArray)
+              .concat(actionContent);
+          } else {
+            // fulfill null value of Additional4
+            querryArray.forEach((item, index) => {
+              item.Additional4 =
+                item.Additional4 == null ? [] : item.Additional4;
+            });
 
-          // with full ep, use . to match 'any data' in watched
-          querryArray.sort(
-            (a, b) => getMinWatched('.', a) - getMinWatched('.', b),
-          );
-        }
+            // with full ep, use . to match 'any data' in watched
+            querryArray.sort(
+              (a, b) => getMinWatched(".", a) - getMinWatched(".", b),
+            );
+          }
         } else {
           // if not sort follow watched then at least need to fullfill these value before create Eposide
-                    querryArray.forEach((item, index) => {
-          item.Additional4 = item.Additional4 == null ? [] : item.Additional4});
+          querryArray.forEach((item, index) => {
+            item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
+          });
         }
-
-        
 
         videoplaylist = new Array();
         if (keyword == "") {
@@ -625,7 +671,7 @@
             url = querryArray[i].url;
             name = querryArray[i].movie + "_EP" + querryArray[i].ep.toString();
             fullcontent = querryArray[i].fullContent;
-            category = querryArray[i].Additional4;
+            let category = querryArray[i].Additional4;
             window.queryData.push({
               name: name,
               content: fullcontent,
@@ -639,13 +685,20 @@
               querryArray[i].subtitle === null
                 ? []
                 : querryArray[i].subtitle.split("\n");
-            var myMovieEp = Eposide(name, url, fullcontent, subtitlePaths, querryArray[i].Additional2, category);
+            var myMovieEp = Eposide(
+              name,
+              url,
+              fullcontent,
+              subtitlePaths,
+              querryArray[i].Additional2,
+              category,
+              keyword,
+            );
 
             videoplaylist.push(myMovieEp);
           }
         } else {
           for (let i = 0; i < querryArray.length; i++) {
-            
             url = querryArray[i].outputFileName;
             if (url == undefined || url.trim() == "") {
               continue;
@@ -655,7 +708,7 @@
               .at(-1)
               .split(".")[0];
             content = querryArray[i].content;
-            category = querryArray[i].Additional4;
+            let category = querryArray[i].Additional4;
             window.queryData.push({
               name: name,
               content: content,
@@ -677,6 +730,7 @@
               subtitlePaths,
               querryArray[i].Additional2,
               category,
+              keyword,
             );
 
             videoplaylist.push(myMovieEp);
@@ -689,22 +743,34 @@
         console.log("Just public this info:", window.queryData);
         return videoplaylist;
       }
-      async function mainThread(moviename, min, max, series) {
+      async function mainThread(
+        moviename,
+        min,
+        max,
+        series,
+        keyword,
+        allPackages,
+      ) {
         keyword = keyword.toLowerCase();
         console.log("on sub mainthread keyword", keyword);
-        if (!window.player) {
-          window.player = videojs("video", {
+        if (!allPackages.player) {
+          allPackages.player = videojs(allPackages.videoContainerId, {
             // inactivityTimeout: 2000,
-          controlBar: {
-            skipButtons: {
-              forward: 5,
-              backward: 5,
+            controlBar: {
+              skipButtons: {
+                forward: 5,
+                backward: 5,
+              },
             },
-          },
-        });
+          });
         }
-        
-
+        if (allPackages.videoContainerId == "video") {
+          window.player = allPackages.player; // assign the global monitor this as main player, can sure it is already created because the previous already run
+        }
+        let containerPlayer = document.getElementById(
+          allPackages.videoContainerId,
+        );
+        let player = videojs(containerPlayer);
 
         // generate the PlayNextButton component
         const Button = videojs.getComponent("Button");
@@ -736,44 +802,49 @@
 
         videojs.registerComponent("PlayNextButton", PlayNextButton);
 
-        myPlaylist = await createPlaylist(moviename, [min, max]);
+        myPlaylist = await createPlaylist(
+          moviename,
+          [min, max],
+          keyword,
+          series,
+          allPackages,
+        );
         // the value AllPatternCanExistFromRegexMovie is already set in createPlaylist function
-        updatePatternOptionsFromText(AllPatternCanExistFromRegexMovie);
-
+        updatePatternOptionsFromText(
+          AllPatternCanExistFromRegexMovie,
+          allPackages.selectionId,
+        );
 
         console.log("success create playlist", myPlaylist);
 
         player.ready(function () {
           // the list of event is removed from player, clear the previous event register to avoid the conflict in async (the event register itself is registering in async code). But not remove the event at the first time, because it will make the control bar lost the autohide function.
-        // monitorVideoCurrentTime();
-        // player.off('play');
-        // player.off('ended');
-        // player.off('playlistitem');
+          // monitorVideoCurrentTime();
+          // player.off('play');
+          // player.off('ended');
+          // player.off('playlistitem');
 
+          player.playlist([]); // clear the default playlist, otherwise, when search again, the new playlist will be added to the old one
+          player.playlist(myPlaylist);
 
-        player.playlist([]); // clear the default playlist, otherwise, when search again, the new playlist will be added to the old one
-        player.playlist(myPlaylist);
-
-        player.playlist.autoadvance(0);
-        triggerCssAnimation();
-
+          player.playlist.autoadvance(0);
+          triggerCssAnimation(player);
 
           // console.log("firstIE", localStorage.getItem("firstLoadingIe")) // still is "yes", after this time, it will be "no" dueto changing in extension, confirm there is only 1 time of adding
-          
-          console.log("ready ..")
-          if (firstClickSearch == "yes") {
-            firstClickSearch = "no";
+
+          console.log("ready ..");
+          if (allPackages.firstClickSearch == "yes") {
+            allPackages.firstClickSearch = "no";
             player.getChild("controlBar").addChild("PlayNextButton", {}, 1);
             player.getChild("controlBar").addChild("PlayPreviousButton", {}, 1);
-
-
-          }
-          else {
-            console.log("not first click search, so remove the event listener to avoid duplicate event firing, not remove at the first time to avoid this code will make the control bar loss the autohide event function")
-            player.off('play');
-            player.off('ended');
-            player.off('playlistitem');
-            triggerCssAnimation();
+          } else {
+            console.log(
+              "not first click search, so remove the event listener to avoid duplicate event firing, not remove at the first time to avoid this code will make the control bar loss the autohide event function",
+            );
+            player.off("play");
+            player.off("ended");
+            player.off("playlistitem");
+            triggerCssAnimation(player);
           }
           this.hotkeys({
             volumeStep: 0.1,
@@ -809,150 +880,230 @@
             },
           });
 
+          // setup volume control
+          // 2. Add custom wheel event ONLY to your specific element
+          var volumeArea = containerPlayer.querySelector(".vjs-volume-panel");
 
-        // setup volume control
-        // 2. Add custom wheel event ONLY to your specific element
-        var volumeArea = document.querySelector(".vjs-volume-panel");
+          volumeArea.addEventListener(
+            "wheel",
+            function (event) {
+              // Prevent default page scroll
+              event.preventDefault();
 
-        volumeArea.addEventListener(
-          "wheel",
-          function (event) {
-            // Prevent default page scroll
-            event.preventDefault();
+              // Determine scroll direction
+              var delta = Math.sign(event.deltaY);
+              var currentVolume = player.volume();
 
-            // Determine scroll direction
-            var delta = Math.sign(event.deltaY);
-            var currentVolume = player.volume();
+              if (delta < 0) {
+                // Scrolled Up / Zoom In -> Increase Volume
+                player.volume(Math.min(1, currentVolume + 0.1));
+              } else {
+                // Scrolled Down / Zoom Out -> Decrease Volume
+                player.volume(Math.max(0, currentVolume - 0.1));
+              }
+            },
+            { passive: false },
+          );
 
-            if (delta < 0) {
-              // Scrolled Up / Zoom In -> Increase Volume
-              player.volume(Math.min(1, currentVolume + 0.1));
-            } else {
-              // Scrolled Down / Zoom Out -> Decrease Volume
-              player.volume(Math.max(0, currentVolume - 0.1));
+          player.playlistUi({
+            playOnSelect: false,
+          });
+
+          player.textTrackSettings.setValues({
+            backgroundColor: "#000",
+            backgroundOpacity: "0.5",
+            fontPercent: 1, // 150% size
+            edgeStyle: "uniform",
+          });
+          player.textTrackSettings.updateDisplay();
+
+          player.on("ended", function () {
+            currentEp =
+              player.playlistMenu.items[player.playlist.currentItem()].item;
+            console.log(
+              "Current item has finished playing on: ",
+              allPackages.videoContainerId,
+              " ",
+              currentEp.fullname,
+            );
+            if (allPackages.videoContainerId == "video-background") {
+              // this will increase Watched only in case of video-background
+              queryToIncreaseWatchedContent(
+                currentEp.fullname,
+                keyword,
+                "",
+                false,
+                "",
+              );
             }
-          },
-          { passive: false },
-        );
+          });
+          player.on("playlistitem", function () {
+            hasHandledInitialPlay = false;
+            console.log(
+              "playlist ",
+              allPackages.videoContainerId,
+              " item changed",
+            );
 
-        player.playlistUi({
-          playOnSelect: false,
+            currentEp =
+              player.playlistMenu.items[player.playlist.currentItem()].item;
+
+            // 1. handle note editor
+            document.title = currentEp.fullname;
+            document.getElementById(allPackages.videoTitle).textContent =
+              document.title;
+            // Turn off captions again from previous selection ep
+
+            if (captionOff) {
+              const tracks = player.textTracks();
+              for (let i = 0; i < tracks.length; i++) {
+                tracks[i].mode = "disabled";
+              }
+            }
+            //
+            if (allPackages.videoContainerId == "video") {
+              // // only handle for the main video handle disable philo and enable timestamp monitor.
+              handleDisablePhilo();
+            }
+          });
+
+          // ----*--*---- add merged function
+          // create all null item in allPackages.
+          allPackages.videoElement = document.getElementById(
+            allPackages.videoContainerId + "_html5_api",
+          );
+          allPackages.containerOfVideoApi = document.getElementById(
+            allPackages.videoContainerId,
+          );
+          allPackages.vjsControlBar =
+            allPackages.containerOfVideoApi.querySelector(".vjs-control-bar");
+
+          //
+          var switchZindexBtn = document.getElementById(
+            allPackages.switchZindexBtn,
+          );
+          if (switchZindexBtn) {
+            switchZindexBtn.disabled = true;
+            switchZindexBtn.addEventListener(
+              "click",
+              togglePlayerLayerPriority,
+            );
+          }
+          // Query all child elements inside this div
+          container = document.getElementById(allPackages.videoContainerId);
+          var videoElement = document.getElementById(
+            allPackages.videoContainerId + "_html5_api",
+          );
+          videoElement.style.position = "absolute";
+          const controlBarEl = player.getChild("controlBar").el();
+          var divSlider = document.getElementById(
+            allPackages.sliderContainerId,
+          );
+          // var switchPlayerBtn = document.getElementById(
+          //   allPackages.switchPlayerId,
+          // );
+          const firstPositionNode = controlBarEl.children[1];
+          const pictureInPicture = controlBarEl.querySelector(
+            ".vjs-picture-in-picture-control",
+          );
+          controlBarEl.insertBefore(divSlider, pictureInPicture);
+          controlBarEl.insertBefore(switchZindexBtn, firstPositionNode);
+
+          // Apply styles to each child
+          var elements = container.querySelectorAll("*");
+
+          elements.forEach(function (el) {
+            if (allPackages.videoContainerId == "video") {
+              el.style.zIndex = "2";
+            } else if (allPackages.videoContainerId == "video-background") {
+              el.style.zIndex = "1";
+            }
+            assignOpacity(
+              container,
+              divSlider.querySelector("md-slider").getAttribute("value"),
+              undefined,
+            );
+          });
+
+          var slider = createSlider(
+            allPackages.createSliderInfo[0],
+            allPackages.createSliderInfo[1],
+            allPackages.createSliderInfo[2],
+          );
+          slider.addEventListener("input", (e) => {
+            const realContainer = slider.closest(
+              "div#video-background, div#video",
+            );
+
+            assignOpacity(
+              realContainer,
+              divSlider.querySelector("md-slider").getAttribute("value"),
+              e,
+            );
+          });
+
+          // turn off caption follow the previous value
+          player.textTracks().addEventListener("change", () => {
+            let activeTrack = null;
+
+            for (let i = 0; i < player.textTracks().length; i++) {
+              const track = player.textTracks()[i];
+              if (track.mode === "showing") {
+                activeTrack = track;
+                break;
+              }
+            }
+
+            if (!activeTrack) {
+              console.log("Captions turned OFF");
+              captionOff = true;
+              // Do something here when captions are off
+            } else {
+              console.log("Captions ON:", activeTrack.label);
+              captionOff = false;
+            }
+          });
         });
-
-        player.textTrackSettings.setValues({
-          backgroundColor: "#000",
-          backgroundOpacity: "0.5",
-          fontPercent: 1, // 150% size
-          edgeStyle: "uniform",
-        });
-        player.textTrackSettings.updateDisplay();
-
-        player.on("ended", function () {
-          currentEp =
-            player.playlistMenu.items[player.playlist.currentItem()].item;
-          console.log("Current item has finished playing:", currentEp.fullname);
-          // queryToIncreaseWatched(currentEp.fullname, keyword);
-          // -> deprecating, will move to oshi
-
-
-          // Your code here
-        });
-        player.on("playlistitem", function () {
-
-          hasHandledInitialPlay = false;
-          console.log("playlist item changed");
-          currentEp =
-            player.playlistMenu.items[player.playlist.currentItem()].item;
-
-          // 1. handle note editor
-          document.title = currentEp.fullname;
-          document.querySelector("#video_title").textContent = document.title;
-
-          // handle disable philo and enable timestamp monitor.
-          handleDisablePhilo();
-
-        });
-
-
-        });
-
-  
 
         // todo: import caption when confirm the subtitles are .srt format
         // await importCaption();
       }
-    </script>
+      function cursorDataSelection(boundaryId) {
+        function insertTextAtCursor(target, text) {
+          if (!target) {
+            return;
+          }
 
-    <script>
+          const start = target.selectionStart ?? target.value.length;
+          const end = target.selectionEnd ?? target.value.length;
+          const nextValue =
+            target.value.slice(0, start) + text + target.value.slice(end);
 
-
-
-      // |||| import these info into oshistamp also ||||
-
-      let pattern_love = /[a-zA-Z]+\d{1,2}/i;
-
-      let concate_pattern_love = /`$|` begin\s{0,2},.*|` begin$|` end\s{0,2},.*|` end$|` e\s{0,2},.*|` e$|` b\s{0,2},.*|` b$/i;
-      let important_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)important(?:\\s{0,3}[,\\n]|$)", 'i')  //this is the patterns get from fromOriginalToSegmentations.py to avoid "this is a long important text " is also captured in important region
-      let action_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)action(?:\\s{0,3}[,\\n]|$)", 'i')
-
-      // let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");   => will be used in .sort alogrithm
-
-      // |||| import these info into oshistamp also ||||
-
-
-
-      const disablePhiloCheckbox = document.querySelector(
-        "#disable-philo-checkbox",
-      );
-      const disableQuillCheckbox = document.querySelector(
-        "#disable-quill",
-      );
-      const autoImport = document.querySelector(
-        "#autoImport",
-      );
-      disableQuillCheckbox.checked = screen.width < 1000;
-      // autoImport.checked = screen.width < 1000;
-      autoImport.checked = true;
-
-      const searchButton = document.querySelector("#search-button");
-      const min = document.querySelector("#min");
-      const max = document.querySelector("#max");
-      const series = document.querySelector("#series");
-      const keywordbox = document.querySelector("#keywordbox");
-      keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\\d{1,2}" : ""; //if this is phone, then assign a specific value
-      function insertTextAtCursor(target, text) {
-        if (!target) {
-          return;
+          target.value = nextValue;
+          const cursorPosition = start + text.length;
+          target.focus();
+          target.setSelectionRange(cursorPosition, cursorPosition);
         }
+        const divBoundary = document.getElementById(boundaryId);
 
-        const start = target.selectionStart ?? target.value.length;
-        const end = target.selectionEnd ?? target.value.length;
-        const nextValue =
-          target.value.slice(0, start) + text + target.value.slice(end);
-
-        target.value = nextValue;
-        const cursorPosition = start + text.length;
-        target.focus();
-        target.setSelectionRange(cursorPosition, cursorPosition);
+        divBoundary
+          .querySelectorAll("[data-insert-value]")
+          .forEach((button) => {
+            if (button.getAttribute("data-insert-value") == "Clear") {
+              button.addEventListener("click", () => {
+                keywordbox.value = "";
+              });
+            } else {
+              button.addEventListener("click", () => {
+                insertTextAtCursor(
+                  keywordbox,
+                  button.getAttribute("data-insert-value"),
+                );
+              });
+            }
+          });
       }
 
-      document.querySelectorAll("[data-insert-value]").forEach((button) => {
-        if (button.getAttribute("data-insert-value") == "Clear") {
-        button.addEventListener("click", () => {
-          keywordbox.value = "";
-        });
-        } else {
-        button.addEventListener("click", () => {
-          insertTextAtCursor(keywordbox, button.getAttribute("data-insert-value"));
-        });
-        }
-
-      });
-
-      let firstLoadingIe = "yes"; // declare this variable outside of the function to make it accessible globally
-      let firstClickSearch = "yes"; //, is used to avoid the Playnext button is added every Search button is clicked
-
-      let keyword = ""; //global declaration
       // this function will work if change Disable philo Or when playlistitemchanged.
       function filterTimestampEditorNodes() {
         const timestampEditor = document.querySelector("#timestamp-editor");
@@ -980,27 +1131,12 @@
       }
 
       function disableQuillEditor() {
-        myQuill = document.querySelector(".ql-editor")
+        myQuill = document.querySelector(".ql-editor");
         if (disableQuillCheckbox.checked) {
-          myQuill.setAttribute("contenteditable",false)
+          myQuill.setAttribute("contenteditable", false);
         } else {
-          myQuill.setAttribute("contenteditable",true)
+          myQuill.setAttribute("contenteditable", true);
         }
-      }
-      if (disablePhiloCheckbox) {
-        disablePhiloCheckbox.checked = screen.width < 1000;
-        disablePhiloCheckbox.addEventListener(
-          "change",
-          filterTimestampEditorNodes,
-        );
-      }
-
-        if (disableQuillCheckbox) {
-        disableQuillCheckbox.checked = screen.width < 1000;
-        disableQuillCheckbox.addEventListener(
-          "change",
-          disableQuillEditor,
-        );
       }
 
       // Timestamp monitoring: highlight active paragraph based on player time
@@ -1067,14 +1203,320 @@
           });
         }, 500);
       }
+      function toggleMerge() {
+        //re-create again, because the beginning assign to the object json is not reference type !
+        videoMain = allPackages.videoElement;
+        videoBg = backGroundAllPackages.videoElement;
+        volumeControl = allPackages.vjsControlBar;
+        volumeControlBg = backGroundAllPackages.vjsControlBar;
+        container = allPackages.containerOfVideoApi;
+        containerBg = backGroundAllPackages.containerOfVideoApi;
+
+        if (!container || !containerBg) {
+          return;
+        }
+
+        if (!merged) {
+          if (
+            document.querySelector("#slider-container > md-slider").value == 100
+          ) {
+            //  setup the initial value for slider in video-main here in merge mode, anyway, after merge, need to decrease the zIndex of top - layer video, if the value is different this value then no need to re create again
+
+            document.querySelector("#slider-container > md-slider").value = 70;
+            document.getElementById("opacityMain").textContent = 0.7;
+          }
+          var bgVideo = document.getElementById("video-background_html5_api");
+          volumeControlBg = containerBg.querySelector(".vjs-control-bar");
+          if (!bgVideo || !volumeControlBg) {
+            return;
+          }
+
+          container.appendChild(bgVideo);
+          container.appendChild(volumeControlBg);
+          containerBg.style.display = "none";
+          mergeBtn.textContent = "UnMerge";
+          merged = true;
+
+          var controlBars = document.querySelectorAll(".vjs-control-bar");
+          if (controlBars.length === 2) {
+            volumeControl = controlBars[0];
+            volumeControlBg = controlBars[1];
+
+            volumeControl.style.zIndex = String(holdOnDict.zIndex[1]);
+            volumeControl.style.display = holdOnDict.display[1];
+            volumeControlBg.style.zIndex = String(holdOnDict.zIndex[0]);
+            volumeControlBg.style.display = holdOnDict.display[0];
+
+            if (videoMain)
+              videoMain.style.zIndex = String(holdOnDict.zIndex[1]);
+            if (videoBg) videoBg.style.zIndex = String(holdOnDict.zIndex[0]);
+
+            var zIndexMainBtn = document.getElementById("zIndexMain");
+            var zIndexBgBtn = document.getElementById("zIndexBg");
+            if (zIndexMainBtn) zIndexMainBtn.disabled = false;
+            if (zIndexBgBtn) zIndexBgBtn.disabled = false;
+          }
+        } else {
+          var bgVideo = document.getElementById("video-background_html5_api");
+          if (!bgVideo) {
+            return;
+          }
+          // appear again in anyway from Unmerge
+          volumeControl = container.querySelectorAll(".vjs-control-bar")[0];
+          volumeControl.style.display = "";
+          volumeControlBg = container.querySelectorAll(".vjs-control-bar")[1];
+          volumeControlBg.style.display = "";
+          containerBg.prepend(volumeControlBg);
+          // containerBg.appendChild(bgVideo); // not use this, will loss event
+          containerBg.prepend(videoBg);
+          containerBg.style.display = "";
+          mergeBtn.textContent = "Merge 2 player";
+          merged = false;
+
+          var zIndexMainBtn = document.getElementById("zIndexMain");
+          var zIndexBgBtn = document.getElementById("zIndexBg");
+          if (zIndexMainBtn) zIndexMainBtn.disabled = true;
+          if (zIndexBgBtn) zIndexBgBtn.disabled = true;
+        }
+      }
+      function togglePlayerLayerPriority() {
+        videoMain = allPackages.videoElement;
+        videoBg = backGroundAllPackages.videoElement;
+        volumeControl = allPackages.vjsControlBar;
+        volumeControlBg = backGroundAllPackages.vjsControlBar;
+        container = allPackages.containerOfVideoApi;
+        containerBg = backGroundAllPackages.containerOfVideoApi;
+
+        var controlBars = Array.from(
+          document.querySelectorAll(".vjs-control-bar"),
+        );
+        if (controlBars.length === 2) {
+          var activeControl = controlBars.find(function (control) {
+            return (
+              parseInt(control.style.zIndex || "1", 10) ===
+                holdOnDict.zIndex[1] &&
+              control.style.display !== holdOnDict.display[0]
+            );
+          });
+          var otherControl = controlBars.find(function (control) {
+            return control !== activeControl;
+          });
+
+          if (activeControl) {
+            activeControl.style.zIndex = String(holdOnDict.zIndex[0]);
+            activeControl.style.display = holdOnDict.display[0];
+          }
+          if (otherControl) {
+            otherControl.style.zIndex = String(holdOnDict.zIndex[1]);
+            otherControl.style.display = holdOnDict.display[1];
+          }
+        }
+
+        var activeVideo = [videoBg, videoMain].find(function (video) {
+          if (!video) return false;
+          return (
+            parseInt(video.style.zIndex || "1", 10) === holdOnDict.zIndex[1]
+          );
+        });
+        var videoOrder = [videoBg, videoMain].filter(Boolean);
+        var otherVideo = videoOrder.find(function (video) {
+          return video !== activeVideo;
+        });
+
+        if (activeVideo) {
+          activeVideo.style.zIndex = String(holdOnDict.zIndex[0]);
+        }
+        if (otherVideo) {
+          otherVideo.style.zIndex = String(holdOnDict.zIndex[1]);
+        }
+      }
+      function assignOpacity(container, initialValue, e) {
+        var elements = Array.from(container.querySelectorAll("*")).filter(
+          function (el) {
+            // all element that is control bar or at the behind layer won't be control the opacity in merge == true
+            if (merged) {
+              return !(
+                el.closest(".vjs-control-bar") ||
+                window.getComputedStyle(el).zIndex === "1" ||
+                el.closest("#timestamp-container")
+              );
+            } else {
+              return !(
+                el.closest(".vjs-control-bar") ||
+                el.closest("#timestamp-container")
+              );
+            }
+          },
+        );
+        elements.forEach(function (el) {
+          if (e != undefined) {
+            el.style.opacity = parseInt(e.target.value, 10) / 100;
+          } else {
+            el.style.opacity = parseInt(initialValue, 10) / 100;
+          }
+        });
+        if (e != undefined && e.target.parentElement.id == "slider-container") {
+          document.getElementById("opacityMain").textContent =
+            parseInt(e.target.value, 10) / 100;
+        }
+      }
+      function createSlider(buttonId, sliderId, mySliderId) {
+        const button = document.getElementById(buttonId);
+        const sliderContainer = document.getElementById(sliderId);
+        const mySlider = document.getElementById(mySliderId);
+        const slider = sliderContainer.querySelector("md-slider");
+
+        let hideTimeout = null;
+        let lastValue = slider.value;
+        let oldTimeoutId = null;
+
+        // Show slider on hover
+        button.addEventListener("mouseenter", () => {
+          sliderContainer.classList.add("visible");
+          if (hideTimeout) {
+            clearTimeout(hideTimeout);
+            hideTimeout = null;
+          }
+        });
+
+        // Start 2s timeout when mouse leaves
+        mySlider.addEventListener("mouseleave", () => {
+          hideTimeout = setTimeout(() => {
+            clearTimeout(oldTimeoutId); // clear the old
+            if (!button.matches(":hover")) {
+              sliderContainer.classList.remove("visible");
+            }
+          }, 500);
+          oldTimeoutId = hideTimeout;
+        });
+
+        // Toggle slider value on button click
+        button.addEventListener("click", () => {
+          if (slider.value != 0) {
+            lastValue = slider.value;
+            slider.value = 0;
+          } else {
+            slider.value = lastValue;
+          }
+        });
+
+        // Listen for slider changes
+        // slider.addEventListener("input", (e) => {
+        //   console.log(`Slider value: ${e.target.value}`);
+        // });
+        return slider;
+      }
+    </script>
+
+    <script>
+      // |||| import these info into oshistamp also ||||
+
+      let pattern_love = /[a-zA-Z]+\d{1,2}/i;
+
+      let concate_pattern_love =
+        /`$|` begin\s{0,2},.*|` begin$|` end\s{0,2},.*|` end$|` e\s{0,2},.*|` e$|` b\s{0,2},.*|` b$/i;
+      let important_pattern = new RegExp(
+        "(?:,\\s{0,2}|`\\s{0,2}|^)important(?:\\s{0,3}[,\\n]|$)",
+        "i",
+      ); //this is the patterns get from fromOriginalToSegmentations.py to avoid "this is a long important text " is also captured in important region
+      let action_pattern = new RegExp(
+        "(?:,\\s{0,2}|`\\s{0,2}|^)action(?:\\s{0,3}[,\\n]|$)",
+        "i",
+      );
+
+      // let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");   => will be used in .sort alogrithm
+
+      // |||| import these info into oshistamp also ||||
+
+      const disablePhiloCheckbox = document.querySelector(
+        "#disable-philo-checkbox",
+      );
+      const disableQuillCheckbox = document.querySelector("#disable-quill");
+      const autoImport = document.querySelector("#autoImport");
+      disableQuillCheckbox.checked = screen.width < 1000;
+      // autoImport.checked = screen.width < 1000;
+      autoImport.checked = true;
+
+      let firstLoadingIe = "yes"; // declare this variable outside of the function to make it accessible globally
+      // let firstClickSearch = "yes"; //, is used to avoid the Playnext button is added every Search button is clicked
+
+      // condition for detecting this is phone
+      // ||| have duplicate this width detection above |||
+      const fullWidth = screen.width;
+      // ||| have duplicate this width detection above |||
+      if (fullWidth < 1000) {
+        // alert("This is phone");
+        // from now, if see Disable Quill is checked can confirm the web has detected Phone mode
+        localStorage.setItem("phone", "yes");
+      } else {
+        localStorage.setItem("phone", "no");
+      }
+
+      const searchButton = document.querySelector("#search-button");
+      const min = document.querySelector("#min");
+      const max = document.querySelector("#max");
+      const seriesBox = document.querySelector("#series");
+      const keywordbox = document.querySelector("#keywordbox");
+      keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\\d{1,2}" : ""; //if this is phone, then assign a specific value
+
+      if (disablePhiloCheckbox) {
+        disablePhiloCheckbox.checked = screen.width < 1000;
+        disablePhiloCheckbox.addEventListener(
+          "change",
+          filterTimestampEditorNodes,
+        );
+      }
+
+      if (disableQuillCheckbox) {
+        disableQuillCheckbox.checked = screen.width < 1000;
+        disableQuillCheckbox.addEventListener("change", disableQuillEditor);
+      }
+
+      let allPackages = {
+        categoryId: "remove-categories",
+        player: null,
+        videoContainerId: "video",
+        revertId: "revert",
+        watchedId: "watched",
+        divBoundary: "mainOutbox",
+        selectionId: "selection",
+        videoTitle: "video_title",
+        firstClickSearch: "yes",
+        sliderContainerId: "mySlider",
+        // switchPlayerId: "zIndexMain",
+        createSliderInfo: ["hover-btn", "slider-container", "mySlider"],
+        switchZindexBtn: "zIndexMain",
+        videoElement: null,
+        vjsControlBar: null,
+        containerOfVideoApi: null,
+      };
+      cursorDataSelection(allPackages.divBoundary);
+
+      const scrollToBackgroundBtn = document.getElementById(
+        "scroll-to-background",
+      );
+      if (scrollToBackgroundBtn) {
+        scrollToBackgroundBtn.addEventListener("click", () => {
+          document.getElementById("background-Outbox").scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+      }
 
       searchButton.addEventListener("click", (event) => {
-        localStorage.setItem("subtractOshi", document.querySelector("#subtractOshi").value);
-
-        keyword = keywordbox.value.trim();
-        console.log("initial keyword", keyword);
-
+        var searchMin = min.value;
+        var searchMax = max.value;
+        let series = seriesBox.value;
+        const value = document.querySelector("#site-search").value.trim();
         window.queryData = [];
+        let keyword = keywordbox.value.trim();
+        console.log("initial keyword for video main", keyword);
+
+        localStorage.setItem(
+          "subtractOshi",
+          document.querySelector("#subtractOshi").value,
+        );
+
         // Both methods retrieve the current search term
         // range is a must, but maybe no need to fill in search box, if not exist, will fill a range that is so large: 1 - 1000
         if (keyword != "") {
@@ -1090,33 +1532,116 @@
           window.channelName = "Life is an adventure"; // use the channelName for create the timestamp when in extension when it still not defined, although channelName is captured in somewhere but at that local function maybe it still not defined.
         }
 
-        // condition for detecting this is phone
-        // ||| have duplicate this width detection above |||
-        const fullWidth = screen.width;
-        // ||| have duplicate this width detection above |||
-        if (fullWidth < 1000) {
-          // alert("This is phone");
-          // from now, if see Disable Quill is checked can confirm the web has detected Phone mode
-          localStorage.setItem("phone", "yes");
-        } else {
-          localStorage.setItem("phone", "no");
-        }
-        var searchMin = min.value;
-        var searchMax = max.value;
-        if (series.value == "" && searchMin == "" && searchMax == "") {
+        if (series == "" && searchMin == "" && searchMax == "") {
           searchMin = 1;
           searchMax = 1000;
         }
 
-        const value = document.querySelector("#site-search").value.trim();
         mainThread(
-          value,          
+          value,
           parseInt(searchMin),
           parseInt(searchMax),
-          series.value,
+          series,
+          keyword,
+          allPackages,
         );
         console.log("Search term:", value);
       });
+
+      // ----*--*----
+
+      const backGroundSearchButton = document.querySelector(
+        "#background-search-button",
+      );
+      const backGroundMin = document.querySelector("#background-min");
+      const backGroundMax = document.querySelector("#background-max");
+      const backGroundSeries = document.querySelector("#background-series");
+      const backGroundKeywordbox = document.querySelector(
+        "#background-keywordbox",
+      );
+      let backGroundKeyword = "";
+      let backGroundAllPackages = {
+        categoryId: "background-remove-categories",
+        player: null,
+        videoContainerId: "video-background",
+        revertId: "background-revert",
+        watchedId: "background-watched",
+        divBoundary: "background-Outbox",
+        selectionId: "background-selection",
+        videoTitle: "background-video_title",
+        firstClickSearch: "yes",
+
+        sliderContainerId: "mySliderBg",
+        // switchPlayerId: "zIndexBg",
+        createSliderInfo: ["hover-btnBg", "slider-containerBg", "mySliderBg"],
+        switchZindexBtn: "zIndexBg",
+        videoElement: null,
+        vjsControlBar: null,
+        containerOfVideoApi: null,
+      };
+      cursorDataSelection(backGroundAllPackages.divBoundary);
+
+      const scrollToMainBtn = document.getElementById("scroll-to-main");
+      if (scrollToMainBtn) {
+        scrollToMainBtn.addEventListener("click", () => {
+          document.getElementById("mainOutbox").scrollIntoView({
+            behavior: "smooth",
+          });
+        });
+      }
+
+      backGroundSearchButton.addEventListener("click", (event) => {
+        var searchMin = backGroundMin.value;
+        var searchMax = backGroundMax.value;
+        let series = backGroundSeries.value;
+        const value = document
+          .querySelector("#background-site-search")
+          .value.trim();
+        window.queryData = [];
+        backGroundKeyword = backGroundKeywordbox.value.trim();
+        console.log("initial keyword for video background", backGroundKeyword);
+
+        if (series == "" && searchMin == "" && searchMax == "") {
+          searchMin = 1;
+          searchMax = 1000;
+        }
+
+        mainThread(
+          value,
+          parseInt(searchMin),
+          parseInt(searchMax),
+          series,
+          backGroundKeyword,
+          backGroundAllPackages,
+        );
+        console.log("Search term:", value);
+      });
+
+      // ----*--*---- add merged function
+
+      var videoMain = allPackages.videoElement; //these are not to create the new items, just mock the reference to outside for toggle and toggle merge working
+      var videoBg = backGroundAllPackages.videoElement;
+      var volumeControl = allPackages.vjsControlBar;
+      var volumeControlBg = backGroundAllPackages.vjsControlBar;
+      var container = allPackages.containerOfVideoApi;
+      var containerBg = backGroundAllPackages.containerOfVideoApi;
+      var merged = false;
+      var captionOff = false;
+
+      var holdOnDict = { zIndex: [1, 2], display: ["none", ""] };
+      setTimeout(() => {
+        document.getElementById("opacityMain").textContent =
+          parseInt(
+            document
+              .getElementById("slider-container")
+              .querySelector("md-slider").value,
+          ) / 100;
+      }, 1000);
+
+      var mergeBtn = document.getElementById("Merge");
+      if (mergeBtn) {
+        mergeBtn.addEventListener("click", toggleMerge);
+      }
     </script>
   </body>
 </html>
