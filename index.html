@@ -281,10 +281,10 @@
 
       async function queryToBackend(movieName, range, keyword, series) {
         try {
-          var urlQuery = new URL("http://192.168.1.200:3000/query");
-          // var urlQuery = new URL(
-          //   "https://backend-210398985503.europe-west1.run.app/query",
-          // );
+          // var urlQuery = new URL("http://192.168.1.200:3000/query");
+          var urlQuery = new URL(
+            "https://backend-210398985503.europe-west1.run.app/query",
+          );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
@@ -316,11 +316,11 @@
         //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
-          var urlQuery = new URL("http://192.168.1.200:7777");
+          // var urlQuery = new URL("http://192.168.1.200:7777");
 
-          // var urlQuery = new URL(
-          //   "https://backendincreasewatched-210398985503.europe-west1.run.app",
-          // );
+          var urlQuery = new URL(
+            "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          );
 
           const payload = {
             epname: epname,
