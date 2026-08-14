@@ -69,6 +69,10 @@
             margin: 0 0 20px;
           "
         >
+          <span> Volum of Main: </span>
+          <!-- this is also the default value in oshi -->
+          <span id="volumeMain">0.7</span>
+          <span> | </span>
           <span> Opacity of Main: </span>
           <span id="opacityMain"></span>
         </div>
@@ -277,10 +281,10 @@
 
       async function queryToBackend(movieName, range, keyword, series) {
         try {
-          // var urlQuery = new URL("http://192.168.1.200:3000/query");
-          var urlQuery = new URL(
-            "https://backend-210398985503.europe-west1.run.app/query",
-          );
+          var urlQuery = new URL("http://192.168.1.200:3000/query");
+          // var urlQuery = new URL(
+          //   "https://backend-210398985503.europe-west1.run.app/query",
+          // );
           urlQuery.searchParams.set("v", movieName);
           urlQuery.searchParams.set("min", range[0]);
           urlQuery.searchParams.set("max", range[1]);
@@ -312,11 +316,11 @@
         //currently this only support in segmentations' tag,
         //epname: supreme_leader_EP102_17213566_446465, keyword: important
         try {
-          // var urlQuery = new URL("http://192.168.1.200:7777");
+          var urlQuery = new URL("http://192.168.1.200:7777");
 
-          var urlQuery = new URL(
-            "https://backendincreasewatched-210398985503.europe-west1.run.app",
-          );
+          // var urlQuery = new URL(
+          //   "https://backendincreasewatched-210398985503.europe-west1.run.app",
+          // );
 
           const payload = {
             epname: epname,
@@ -738,7 +742,7 @@
         }
         // if there is no item, set new, if exist, delete the old (because there is limit in storage of localStorage, also, the query info is different between each time and key must be unique)
         localStorage.setItem("queryData", JSON.stringify(window.queryData));
-        localStorage.setItem("channelName", window.channelName);
+        // localStorage.setItem("channelName", window.channelName);
         localStorage.setItem("firstLoadingIe", firstLoadingIe);
         console.log("Just public this info:", window.queryData);
         return videoplaylist;
@@ -917,6 +921,23 @@
           });
           player.textTrackSettings.updateDisplay();
 
+          if (allPackages.videoContainerId == "video") {
+            // Listen for volume changes on main only
+            var volumeSlider = player.el().querySelector(".vjs-volume-bar");
+            volumeSlider.onmouseenter = function () {
+              manualVolumeControl = true;
+            };
+            volumeSlider.onmouseleave = function () {
+              manualVolumeControl = false;
+            };
+
+            player.on("volumechange", function (e) {
+              if (manualVolumeControl) {
+                document.getElementById("volumeMain").textContent =
+                  player.volume();
+              }
+            });
+          }
           player.on("ended", function () {
             currentEp =
               player.playlistMenu.items[player.playlist.currentItem()].item;
@@ -1433,7 +1454,7 @@
       );
       const disableQuillCheckbox = document.querySelector("#disable-quill");
       const autoImport = document.querySelector("#autoImport");
-      disableQuillCheckbox.checked = screen.width < 1000;
+      // disableQuillCheckbox.checked = screen.width < 1000;
       // autoImport.checked = screen.width < 1000;
       autoImport.checked = true;
 
@@ -1460,7 +1481,6 @@
       keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\\d{1,2}" : ""; //if this is phone, then assign a specific value
 
       if (disablePhiloCheckbox) {
-        disablePhiloCheckbox.checked = screen.width < 1000;
         disablePhiloCheckbox.addEventListener(
           "change",
           filterTimestampEditorNodes,
@@ -1512,11 +1532,6 @@
         let keyword = keywordbox.value.trim();
         console.log("initial keyword for video main", keyword);
 
-        localStorage.setItem(
-          "subtractOshi",
-          document.querySelector("#subtractOshi").value,
-        );
-
         // Both methods retrieve the current search term
         // range is a must, but maybe no need to fill in search box, if not exist, will fill a range that is so large: 1 - 1000
         if (keyword != "") {
@@ -1524,12 +1539,12 @@
           // This is for review steps at segmentations, notice the <a> tag
           document.querySelector("#owner-name > a").textContent =
             "A consistency mind can change everything";
-          window.channelName = "A consistency mind can change everything";
+          // window.channelName = "A consistency mind can change everything";
         } else {
           // localStorage.setItem("context","original")
           document.querySelector("#owner-name > a").textContent =
             "Life is an adventure"; //must exist to avoid the current page are in consistency.. but press Enter for keyword == "", then it will keep this title and classify data to wrong channel
-          window.channelName = "Life is an adventure"; // use the channelName for create the timestamp when in extension when it still not defined, although channelName is captured in somewhere but at that local function maybe it still not defined.
+          // window.channelName = "Life is an adventure"; // use the channelName for create the timestamp when in extension when it still not defined, although channelName is captured in somewhere but at that local function maybe it still not defined.
         }
 
         if (series == "" && searchMin == "" && searchMax == "") {
@@ -1627,6 +1642,7 @@
       var containerBg = backGroundAllPackages.containerOfVideoApi;
       var merged = false;
       var captionOff = false;
+      var manualVolumeControl = false;
 
       var holdOnDict = { zIndex: [1, 2], display: ["none", ""] };
       setTimeout(() => {
