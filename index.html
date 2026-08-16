@@ -147,6 +147,7 @@
         </label>
         <button id="background-search-button">Search</button>
         <button id="scroll-to-main" type="button">Go Main</button>
+        <button type="button" id="Merge">Merge 2 player</button>
       </div>
       <div>
         <input
@@ -174,10 +175,9 @@
     </div>
     <h1 id="background-video_title">Title of movie Background</h1>
 
-    <div id="mergeDiv">
+    <div id="mergeDiv" style="display: none">
       <button id="zIndexMain" style="cursor: pointer">📒</button>
       <button id="zIndexBg" style="cursor: pointer">📄</button>
-      <button type="button" id="Merge">Merge 2 player</button>
       <div id="mySlider">
         <button id="hover-btn">📀</button>
         <div id="slider-container">
@@ -1224,6 +1224,8 @@
           });
         }, 500);
       }
+
+      // var enableMainFullScreen = function() {};
       function toggleMerge() {
         //re-create again, because the beginning assign to the object json is not reference type !
         videoMain = allPackages.videoElement;
@@ -1238,6 +1240,26 @@
         }
 
         if (!merged) {
+          // assign the event listener to the background video element,listen follow the event from the main
+          var fullscreenToggle =
+            backGroundAllPackages.player.controlBar.fullscreenToggle;
+          // var mainfullscreenToggle =
+          //   allPackages.player.controlBar.fullscreenToggle;
+          // fullscreenToggle.removeEventListener("click", enableMainFullScreen);
+          // fullscreenToggle.on("click", async function enableMainFullScreen() {
+          //   if (container.classList.contains("vjs-fullscreen")) {
+          //     console.log("Exit full screen on Main");
+          //     // await player.exitFullscreen();
+          //     mainfullscreenToggle.el().click()
+          //   } else {
+          //     console.log("Enable full screen on Main");
+          //     // allPackages.player.requestFullscreen(); // dont know why, but can not use allPackages.player for request in this case
+          //     // await player.requestFullscreen();
+          //     mainfullscreenToggle.el().click()
+          //   }
+          // });
+          // fullscreenToggle.el().disabled = true;
+          fullscreenToggle.el().style.display = "none";
           if (
             document.querySelector("#slider-container > md-slider").value == 100
           ) {
@@ -1278,6 +1300,12 @@
             if (zIndexBgBtn) zIndexBgBtn.disabled = false;
           }
         } else {
+          // remove the fullscreen event only for specific function
+          var fullscreenToggle =
+            backGroundAllPackages.player.controlBar.fullscreenToggle;
+          // // fullscreenToggle.removeEventListener("click", enableMainFullScreen);
+          fullscreenToggle.el().style.display = "";
+
           var bgVideo = document.getElementById("video-background_html5_api");
           if (!bgVideo) {
             return;
