@@ -212,6 +212,8 @@
         const video = player.tech().el();
 
         function firstPlayHandler() {
+          // avoid clicking durring the fadeIn/out of onTimeUpdate then capture that effect forever
+          video.style.opacity = document.getElementById("opacityMain").textContent;
           video.classList.remove("fade-in");
           void video.offsetWidth;
           video.classList.add("fade-in");
@@ -232,6 +234,7 @@
         }
 
         function normalPlayHandler() {
+          video.style.opacity = document.getElementById("opacityMain").textContent;
           video.classList.remove("fade-in");
           void video.offsetWidth;
           video.classList.add("fade-in");
@@ -625,11 +628,13 @@
                   action_pattern.test(item.content.toLowerCase().trim()) &&
                   !item.Additional4.includes("notaction")) ||
                 item.Additional4.includes("action");
-              if (isImportant) {
-                importantContent.push(item);
-                removeItems.push(index);
-              } else if (isAction) {
+              if (isAction) {
                 actionContent.push(item);
+
+                removeItems.push(index);
+              } else if (isImportant) {
+                importantContent.push(item);
+
                 removeItems.push(index);
               }
             });
@@ -984,6 +989,9 @@
             //
             if (allPackages.videoContainerId == "video") {
               // // only handle for the main video handle disable philo and enable timestamp monitor.
+              setTimeout(() => {
+                handleWhenQuillExisting();
+              }, 300);
               handleDisablePhilo();
             }
           });
@@ -1143,12 +1151,30 @@
           if (disablePhiloCheckbox.checked) {
             const isMatch =
               pattern_love.test(cleanedText) ||
-              concate_pattern_love.test(cleanedText);
+              concate_pattern_love.test(cleanedText) ||
+              important_pattern.test(cleanedText) ||
+              action_pattern.test(cleanedText);
             node.style.display = isMatch ? "" : "none";
           } else {
             node.style.display = "";
           }
         });
+      }
+
+      function handleWhenQuillExisting() {
+        var t = 0,
+          n = function () {
+            t++;
+
+            videoElement = document.querySelector("#video");
+            timestamp = document.querySelector("#timestamp-container");
+
+            // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
+            (videoElement && timestamp) || t >= 10
+              ? disableQuillEditor()
+              : setTimeout(n, 500 + 100 * t);
+          };
+        setTimeout(n, 300);
       }
 
       function disableQuillEditor() {
@@ -1472,6 +1498,15 @@
         "(?:,\\s{0,2}|`\\s{0,2}|^)action(?:\\s{0,3}[,\\n]|$)",
         "i",
       );
+      let soundFade_pattern = new RegExp(
+        "(?:,\\s{0,2}|`\\s{0,2}|^)\\d+(?:\\s{0,3}[,\\n]|$)",
+        "i",
+      );
+      let screenFade_pattern = new RegExp(
+        "(?:,\\s{0,2}|`\\s{0,2}|^)\\d+f(?:\\s{0,3}[,\\n]|$)",
+        "i",
+      );
+      
 
       // let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");   => will be used in .sort alogrithm
 
@@ -1516,7 +1551,7 @@
       }
 
       if (disableQuillCheckbox) {
-        disableQuillCheckbox.checked = screen.width < 1000;
+        // disableQuillCheckbox.checked = screen.width < 1000;
         disableQuillCheckbox.addEventListener("change", disableQuillEditor);
       }
 
