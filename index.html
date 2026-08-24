@@ -213,7 +213,8 @@
 
         function firstPlayHandler() {
           // avoid clicking durring the fadeIn/out of onTimeUpdate then capture that effect forever
-          video.style.opacity = document.getElementById("opacityMain").textContent;
+          video.style.opacity =
+            document.getElementById("opacityMain").textContent;
           video.classList.remove("fade-in");
           void video.offsetWidth;
           video.classList.add("fade-in");
@@ -234,7 +235,8 @@
         }
 
         function normalPlayHandler() {
-          video.style.opacity = document.getElementById("opacityMain").textContent;
+          video.style.opacity =
+            document.getElementById("opacityMain").textContent;
           video.classList.remove("fade-in");
           void video.offsetWidth;
           video.classList.add("fade-in");
@@ -280,6 +282,7 @@
               : setTimeout(n, 500 + 100 * t);
           };
         setTimeout(n, 300);
+        console.log("I am running 1");
       }
 
       async function queryToBackend(movieName, range, keyword, series) {
@@ -989,9 +992,10 @@
             //
             if (allPackages.videoContainerId == "video") {
               // // only handle for the main video handle disable philo and enable timestamp monitor.
-              setTimeout(() => {
-                handleWhenQuillExisting();
-              }, 300);
+              // setTimeout(() => {
+              //   handleWhenQuillExisting();
+              // }, 300);
+              // not do this, already do on oshi to handle when overlay, not duplicate at this side
               handleDisablePhilo();
             }
           });
@@ -1159,32 +1163,33 @@
             node.style.display = "";
           }
         });
+        console.log("I am running 3");
       }
 
-      function handleWhenQuillExisting() {
-        var t = 0,
-          n = function () {
-            t++;
+      // function handleWhenQuillExisting() {
+      //   var t = 0,
+      //     n = function () {
+      //       t++;
 
-            videoElement = document.querySelector("#video");
-            timestamp = document.querySelector("#timestamp-container");
+      //       videoElement = document.querySelector("#video");
+      //       timestamp = document.querySelector("#timestamp-container");
 
-            // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
-            (videoElement && timestamp) || t >= 10
-              ? disableQuillEditor()
-              : setTimeout(n, 500 + 100 * t);
-          };
-        setTimeout(n, 300);
-      }
+      //       // 2026-04-28 15:41:21: avoid loop in set timeout if not found elements above.
+      //       (videoElement && timestamp) || t >= 10
+      //         ? disableQuillEditor()
+      //         : setTimeout(n, 500 + 100 * t);
+      //     };
+      //   setTimeout(n, 300);
+      // }
 
-      function disableQuillEditor() {
-        myQuill = document.querySelector(".ql-editor");
-        if (disableQuillCheckbox.checked) {
-          myQuill.setAttribute("contenteditable", false);
-        } else {
-          myQuill.setAttribute("contenteditable", true);
-        }
-      }
+      // function disableQuillEditor() {
+      //   // myQuill = document.querySelector(".ql-editor");
+      //   if (disableQuillCheckbox.checked) {
+      //     window.quillEditor.editor.enable(false)
+      //   } else {
+      //     window.quillEditor.editor.enable(true)
+      //   }
+      // }
 
       // Timestamp monitoring: highlight active paragraph based on player time
       function clearTimestampMonitor() {
@@ -1249,6 +1254,7 @@
             }
           });
         }, 500);
+        console.log("I am running 2");
       }
 
       // var enableMainFullScreen = function() {};
@@ -1489,7 +1495,8 @@
       let pattern_love = /[a-zA-Z]+\d{1,2}/i;
 
       let concate_pattern_love =
-        /`$|` begin\s{0,2},.*|` begin$|` end\s{0,2},.*|` end$|` e\s{0,2},.*|` e$|` b\s{0,2},.*|` b$/i;
+        /`$|`\s{0,2}e\s{0,2},.*|`\s{0,2}e$|`\s{0,2}b\s{0,2},.*|`\s{0,2}b$/i;
+
       let important_pattern = new RegExp(
         "(?:,\\s{0,2}|`\\s{0,2}|^)important(?:\\s{0,3}[,\\n]|$)",
         "i",
@@ -1506,7 +1513,6 @@
         "(?:,\\s{0,2}|`\\s{0,2}|^)\\d+f(?:\\s{0,3}[,\\n]|$)",
         "i",
       );
-      
 
       // let common_pattern = new RegExp("(?:,\\s{0,2}|`\\s{0,2}|^)" + keyword + "(?:\\s{0,3}[,\\n]|$)", "i");   => will be used in .sort alogrithm
 
@@ -1515,7 +1521,6 @@
       const disablePhiloCheckbox = document.querySelector(
         "#disable-philo-checkbox",
       );
-      const disableQuillCheckbox = document.querySelector("#disable-quill");
       const autoImport = document.querySelector("#autoImport");
       // disableQuillCheckbox.checked = screen.width < 1000;
       // autoImport.checked = screen.width < 1000;
@@ -1550,10 +1555,11 @@
         );
       }
 
-      if (disableQuillCheckbox) {
-        // disableQuillCheckbox.checked = screen.width < 1000;
-        disableQuillCheckbox.addEventListener("change", disableQuillEditor);
-      }
+      // const disableQuillCheckbox = document.querySelector("#disable-quill");
+
+      // if (disableQuillCheckbox) {
+      //   disableQuillCheckbox.addEventListener("change", disableQuillEditor);
+      // }
 
       let allPackages = {
         categoryId: "remove-categories",
