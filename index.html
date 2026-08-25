@@ -559,6 +559,18 @@
           removeOrKeepCategories.push("here");
           // because 2 types consider' and here' is the same: here will tell this ep already fix from begin while consider tell maybe some previous position still not note correctly
         }
+        // this compare not work in array type of js
+        // removeOrKeepCategories = removeOrKeepCategories == [''] ? [] : removeOrKeepCategories;
+        if (
+          Array.isArray(removeOrKeepCategories) &&
+          removeOrKeepCategories.length === 1 &&
+          removeOrKeepCategories[0] === ""
+        ) {
+          removeOrKeepCategories = []
+        } 
+        // else {
+        //   console.log("It is not equal");
+        // }
 
         if (document.getElementById(allPackages.revertId).checked) {
           removeOrKeepCategories.forEach((category) => {
