@@ -52,6 +52,7 @@
       </div>
       <div>
         <input id="subtractOshi" placeholder="subtract.." value="2" />
+        <input id="loopBetweenPlayer" placeholder="loop between players.." value="20" />
         <label style="background-color: #5a3bf6">
           <input id="autoImport" type="checkbox" /> Auto Import
         </label>
@@ -206,6 +207,151 @@
     ></script>
 
     <script>
+      // modify the listening from content.js
+      window.addEventListener("message", function (event) {
+        // Safety check: ensure the message comes from the current window frame
+        if (event.source !== window) return;
+
+        // Filter and check for your specific custom identifier string
+        if (event.data && event.data.type === "FROM_CONTENT_SCRIPT_LOOP") {
+          console.log("📢 Received signal from Chrome Extension loop!");
+          // console.log("Data payload:", event.data.text);
+          togglePlayerLayerPriority(event, "middle");
+
+          // Execute any main page functions here
+        }
+      });
+
+      // |||||||||| duplicate the fadein and fadeout at content.js, only
+
+      function fadeOutAtTime(videoElement, duration) {
+        // no change much fadeOut from content.js
+        const durationMs = duration * 1000;
+        var oldOpacity = 1;
+        var oldVolume = (function () {
+          var el = document.getElementById("volumeMain");
+          if (!el) return 0.7;
+          var value = parseFloat(el.textContent.trim());
+          return Number.isFinite(value)
+            ? Math.min(Math.max(value, 0.05), 1)
+            : 0.7;
+        })();
+
+        videoElement.style.opacity = oldOpacity;
+        videoElement.volume = oldVolume;
+
+        const start = performance.now();
+        let lastUpdateTime = start;
+        // Change this number to control CPU throttle.
+        // 33.33ms = ~30fps (Massive CPU saving, looks identical to the human eye for fades)
+        const throttleInterval = 33.33;
+        function step(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / durationMs, 1) + 0.01; //make sure the below setting will be avoid 1.001
+          // with volume setting, the maximum setting is only 0.7 for both fadein and out >
+          if (now - lastUpdateTime >= throttleInterval || progress === 1) {
+            lastUpdateTime = now; // Update the timestamp anchor
+            videoElement.style.opacity = oldOpacity - progress;
+            // console.log("progress reduced");
+            var nextVolume = oldVolume + (0.05 - oldVolume) * progress;
+            videoElement.volume = nextVolume > 0.05 ? nextVolume : 0.05;
+          }
+          // in 5 first seconds, no chance that the video Element will have opacity is decreased
+          if (progress < 1 && videoElement.currentTime >= 5) {
+            requestAnimationFrame(step);
+          }
+          // make sure before ending, the EventListerner have already released
+          else if (videoElement.currentTime >= videoElement.duration - 0.5) {
+            console.log(
+              "has setup opacity = 0 at video currenttime and remove Event listener:",
+              videoElement.currentTime,
+            );
+            // remove it, or when jump to next video in playlist, there will be overide between previous event and current event
+            videoElement.removeEventListener("timeupdate", onTimeUpdate);
+            videoElement.style.opacity = 0;
+            videoElement.volume = 0.05;
+          }
+        }
+
+        requestAnimationFrame(step);
+        // };
+
+        // videoElement.addEventListener("timeupdate", onTimeUpdate);
+      }
+
+      function fadeInAtTime(videoElement, duration) {
+        var oldOpacity = parseFloat(
+          document.getElementById("opacityMain").textContent.trim(),
+        );
+        var finalOpacity = 1;
+        var targetVolume = (function () {
+          var el = document.getElementById("volumeMain");
+          if (!el) return 0.7;
+          var value = parseFloat(el.textContent.trim());
+          return Number.isFinite(value) ? Math.min(Math.max(value, 0), 1) : 0.7;
+        })();
+
+        let isRunningFirstPlayHandler =
+          JSON.parse(localStorage.getItem("isRunningFirstPlayHandler")) ||
+          videoElement.currentTime < 2;
+
+        const durationMs = duration * 1000;
+
+        if (isRunningFirstPlayHandler) {
+          videoElement.style.opacity = oldOpacity;
+        } else {
+          videoElement.style.opacity = oldOpacity;
+        }
+        videoElement.volume = 0.05;
+
+        const start = performance.now();
+
+        // OPTIMIZATION: Track the last time we updated the DOM
+        let lastUpdateTime = start;
+        // Change this number to control CPU throttle.
+        // 33.33ms = ~30fps (Massive CPU saving, looks identical to the human eye for fades)
+        const throttleInterval = 33.33;
+
+        function step(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / durationMs, 1);
+
+          // Check if enough time has passed since the last frame execution OR if it's the final frame
+          if (now - lastUpdateTime >= throttleInterval || progress === 1) {
+            lastUpdateTime = now; // Update the timestamp anchor
+
+            // 1. OPAcity DOM UPDATE
+            if (!isRunningFirstPlayHandler) {
+              if (oldOpacity) {
+                videoElement.style.opacity =
+                  oldOpacity + progress * (finalOpacity - oldOpacity);
+                // console.log("progress");
+              } else {
+                videoElement.style.opacity = progress;
+              }
+            }
+
+            // 2. VOLUME DOM UPDATE
+            videoElement.volume = 0.05 + (targetVolume - 0.05) * progress;
+          }
+
+          // Continue loop if not complete
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          } else {
+            // Ensure absolute precise final values on completion
+            if (!isRunningFirstPlayHandler) {
+              videoElement.style.opacity = oldOpacity ? finalOpacity : 1;
+            }
+            videoElement.volume = targetVolume;
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      // |||||||||| duplicate the fadein and fadeout at content.js, only
+
       let hasHandledInitialPlay = false;
 
       function triggerCssAnimation(player) {
@@ -229,7 +375,7 @@
           localStorage.setItem("isRunningFirstPlayHandler", true);
           // After 2 seconds, set it to false
           setTimeout(() => {
-            localStorage.setItem("isRunningFirstPlayHandler", "false");
+            localStorage.setItem("isRunningFirstPlayHandler", false);
           }, 2000);
           console.log("Play event fired (first time)!");
         }
@@ -566,8 +712,8 @@
           removeOrKeepCategories.length === 1 &&
           removeOrKeepCategories[0] === ""
         ) {
-          removeOrKeepCategories = []
-        } 
+          removeOrKeepCategories = [];
+        }
         // else {
         //   console.log("It is not equal");
         // }
@@ -1027,12 +1173,19 @@
           var switchZindexBtn = document.getElementById(
             allPackages.switchZindexBtn,
           );
+          // if (switchZindexBtn) {
+          //   switchZindexBtn.disabled = true;
+          //   switchZindexBtn.addEventListener(
+          //     "click",
+          //     togglePlayerLayerPriority,
+          //   );
+          // }
+
           if (switchZindexBtn) {
             switchZindexBtn.disabled = true;
-            switchZindexBtn.addEventListener(
-              "click",
-              togglePlayerLayerPriority,
-            );
+            switchZindexBtn.addEventListener("click", (e) => {
+              togglePlayerLayerPriority(e, "zindexbutton");
+            });
           }
           // Query all child elements inside this div
           container = document.getElementById(allPackages.videoContainerId);
@@ -1106,6 +1259,25 @@
             } else {
               console.log("Captions ON:", activeTrack.label);
               captionOff = false;
+            }
+          });
+
+          // Listen for auxclick (middle/right clicks)
+          player.el().addEventListener("auxclick", function (event) {
+            // MouseEvent.button property: 0 = Left, 1 = Middle, 2 = Right
+            if (event.button === 1) {
+              // Prevent the default browser action (like auto-scrolling)
+              event.preventDefault();
+
+              // console.log("Middle mouse button clicked on the video player!");
+              togglePlayerLayerPriority(event, "middle");
+
+              // Example Action: Toggle play/pause on middle-click
+              // if (player.paused()) {
+              //   player.play();
+              // } else {
+              //   player.pause();
+              // }
             }
           });
         });
@@ -1372,7 +1544,7 @@
           if (zIndexBgBtn) zIndexBgBtn.disabled = true;
         }
       }
-      function togglePlayerLayerPriority() {
+      function togglePlayerLayerPriority(e, selection) {
         videoMain = allPackages.videoElement;
         videoBg = backGroundAllPackages.videoElement;
         volumeControl = allPackages.vjsControlBar;
@@ -1421,6 +1593,16 @@
         }
         if (otherVideo) {
           otherVideo.style.zIndex = String(holdOnDict.zIndex[1]);
+        }
+
+        // add toggle layer
+        if (selection == "middle") {
+          console.log("there is middle mouse click");
+          activeVideo.pause();
+          otherVideo.play();
+
+          fadeInAtTime(otherVideo, 1.5); //not change the default opacity of video element
+          fadeOutAtTime(activeVideo, 1.5);
         }
       }
       function assignOpacity(container, initialValue, e) {
