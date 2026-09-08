@@ -52,7 +52,11 @@
       </div>
       <div>
         <input id="subtractOshi" placeholder="subtract.." value="2" />
-        <input id="loopBetweenPlayer" placeholder="loop between players.." value="20" />
+        <input
+          id="loopBetweenPlayer"
+          placeholder="loop between players.."
+          value="20"
+        />
         <label style="background-color: #5a3bf6">
           <input id="autoImport" type="checkbox" /> Auto Import
         </label>
@@ -907,10 +911,12 @@
           }
         }
         // if there is no item, set new, if exist, delete the old (because there is limit in storage of localStorage, also, the query info is different between each time and key must be unique)
-        localStorage.setItem("queryData", JSON.stringify(window.queryData));
-        // localStorage.setItem("channelName", window.channelName);
-        localStorage.setItem("firstLoadingIe", firstLoadingIe);
-        console.log("Just public this info:", window.queryData);
+        if (allPackages.videoContainerId == "video") {
+          localStorage.setItem("queryData", JSON.stringify(window.queryData));
+          // localStorage.setItem("channelName", window.channelName);
+          localStorage.setItem("firstLoadingIe", firstLoadingIe);
+          console.log("Just public this info:", window.queryData);
+        }
         return videoplaylist;
       }
       async function mainThread(
