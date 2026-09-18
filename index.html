@@ -57,6 +57,11 @@
           placeholder="loop between players.."
           value="20"
         />
+        <input
+          id="loopBetweenImportant"
+          placeholder="loop between important.."
+          value="3"
+        />
         <label style="background-color: #5a3bf6">
           <input id="autoImport" type="checkbox" /> Auto Import
         </label>
@@ -211,12 +216,105 @@
     ></script>
 
     <script>
+      let activeWheelHandler = null;
+      let isWheelThrottled = false;
+
+      function handleWheelToggle(event, timestamps) {
+        // Stop the background webpage from scrolling up/down
+        event.preventDefault();
+
+        if (isWheelThrottled) return;
+        if (!timestamps || !Array.isArray(timestamps)) return;
+
+        // const videoElement = document.querySelector("video");
+        const videoElement = allPackages.videoElement;
+        if (!videoElement) return;
+
+        const currentTime = videoElement.currentTime;
+
+        const convertSeconds = (timeStr) => {
+          const parts = timeStr.split(":").map(Number);
+          if (parts.length === 3)
+            return parts[0] * 3600 + parts[1] * 60 + parts[2];
+          if (parts.length === 2) return parts[0] * 60 + parts[1];
+          return parts[0] || 0;
+        };
+
+        const sortedTimestamps = timestamps
+          .map((item) => ({ ...item, seconds: convertSeconds(item.timestamp) }))
+          .sort((a, b) => a.seconds - b.seconds);
+
+        // if (event.deltaY < 0) {
+        //   // Scrolled UP ↑: jump to previous timestamp
+        //   let targetTime = 0;
+        //   for (let i = sortedTimestamps.length - 1; i >= 0; i--) {
+        //     if (sortedTimestamps[i].seconds < currentTime) {
+        //       targetTime = sortedTimestamps[i].seconds;
+        //       break;
+        //     }
+        //   }
+        //   console.log(
+        //     `Scrolled UP ↑. Jumping to previous timestamp: ${targetTime}s`,
+        //   );
+        //   videoElement.currentTime = targetTime;
+
+        //   // Throttle wheel events for 2 seconds
+        //   isWheelThrottled = true;
+        //   setTimeout(() => {
+        //     isWheelThrottled = false;
+        //   }, 2000);
+        // } else if (event.deltaY > 0) {
+        if (event.deltaY > 0) {
+          // Scrolled DOWN ↓: jump to next timestamp
+          let targetTime = videoElement.duration || 0;
+          for (let i = 0; i < sortedTimestamps.length; i++) {
+            if (sortedTimestamps[i].seconds > currentTime) {
+              targetTime = sortedTimestamps[i].seconds;
+              break;
+            }
+          }
+          console.log(
+            `Scrolled DOWN ↓. Jumping to next timestamp: ${targetTime}s`,
+          );
+          videoElement.currentTime = targetTime;
+
+          // Throttle wheel events for 2 seconds
+          isWheelThrottled = true;
+          setTimeout(() => {
+            isWheelThrottled = false;
+          }, 2000);
+        }
+      }
       // modify the listening from content.js
       window.addEventListener("message", function (event) {
         // Safety check: ensure the message comes from the current window frame
         if (event.source !== window) return;
 
         // Filter and check for your specific custom identifier string
+        if (event.data && event.data.type === "wheeltoggle") {
+          const playerMain = window.player ? window.player.el() : null;
+
+          if (playerMain && event.data.isWheelToggle == "seg1") {
+            // console.log(
+            //   "enable wheel event, every jump will go into timestamp of this data",
+            // );
+            // console.log(event.data.data);
+            if (activeWheelHandler) {
+              playerMain.removeEventListener("wheel", activeWheelHandler);
+            }
+            activeWheelHandler = (e) => handleWheelToggle(e, event.data.data);
+            playerMain.addEventListener("wheel", activeWheelHandler, {
+              passive: false,
+            });
+          } else if (playerMain && event.data.isWheelToggle == "seg2") {
+            // console.log("disable wheel event");
+            if (activeWheelHandler) {
+              playerMain.removeEventListener("wheel", activeWheelHandler);
+              activeWheelHandler = null;
+            }
+          }
+        }
+
         if (event.data && event.data.type === "FROM_CONTENT_SCRIPT_LOOP") {
           console.log("📢 Received signal from Chrome Extension loop!");
           // console.log("Data payload:", event.data.text);
