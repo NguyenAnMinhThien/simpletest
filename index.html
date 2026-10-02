@@ -11,8 +11,8 @@
       href="https://cdn.jsdelivr.net/npm/videojs-playlist-ui@5.0.0/dist/videojs-playlist-ui.min.css"
       rel="stylesheet"
     />
-<!-- This tag changes your favicon -->
-    <link rel="icon" type="image/x-icon" href="/simpletest/favicon.ico">
+    <!-- This tag changes your favicon -->
+    <link rel="icon" type="image/x-icon" href="/simpletest/favicon.ico" />
     <link href="examples.css" rel="stylesheet" />
   </head>
   <body>
@@ -291,11 +291,10 @@
       window.addEventListener("message", function (event) {
         // Safety check: ensure the message comes from the current window frame
         if (event.source !== window) return;
+        const playerMain = window.player ? window.player.el() : null;
 
         // Filter and check for your specific custom identifier string
         if (event.data && event.data.type === "wheeltoggle") {
-          const playerMain = window.player ? window.player.el() : null;
-
           if (playerMain && event.data.isWheelToggle == "seg1") {
             // console.log(
             //   "enable wheel event, every jump will go into timestamp of this data",
@@ -328,6 +327,16 @@
           togglePlayerLayerPriority(event, "middle");
 
           // Execute any main page functions here
+        }
+
+        if (event.data && event.data.type === "hasRunFirstPlay") {
+          console.log("has finished first run on startup");
+          hasHandledInitialPlay = true;
+        }
+
+        if (event.data && event.data.type === "unmuted") {
+          console.log("just receive unmuted");
+          allPackages.player.muted(false);
         }
       });
 
@@ -400,11 +409,9 @@
           return Number.isFinite(value) ? Math.min(Math.max(value, 0), 1) : 0.7;
         })();
 
-        let isRunningFirstPlayHandler = temporaryFirstPlay.logic;
-
         const durationMs = duration * 1000;
 
-        if (isRunningFirstPlayHandler) {
+        if (hasHandledInitialPlay) {
           videoElement.style.opacity = oldOpacity;
         } else {
           videoElement.style.opacity = oldOpacity;
@@ -428,7 +435,7 @@
             lastUpdateTime = now; // Update the timestamp anchor
 
             // 1. OPAcity DOM UPDATE
-            if (!isRunningFirstPlayHandler) {
+            if (!hasHandledInitialPlay) {
               if (oldOpacity) {
                 videoElement.style.opacity =
                   oldOpacity + progress * (finalOpacity - oldOpacity);
@@ -447,7 +454,7 @@
             requestAnimationFrame(step);
           } else {
             // Ensure absolute precise final values on completion
-            if (!isRunningFirstPlayHandler) {
+            if (!hasHandledInitialPlay) {
               videoElement.style.opacity = oldOpacity ? finalOpacity : 1;
             }
             videoElement.volume = targetVolume;
@@ -460,52 +467,52 @@
       // |||||||||| duplicate the fadein and fadeout at content.js, only
 
       let hasHandledInitialPlay = false;
-      var temporaryFirstPlay = {
-        //initialize as true, like isRunningFirstPlayHandler in oshi
-        logic: true,
-      };
+      // var temporaryFirstPlay = {
+      //   //initialize as true, like isRunningFirstPlayHandler in oshi
+      //   logic: true,
+      // };
 
       function triggerCssAnimation(player) {
         const video = player.tech().el();
 
-        function firstPlayHandler() {
-          // avoid clicking durring the fadeIn/out of onTimeUpdate then capture that effect forever
-          video.style.opacity =
-            document.getElementById("opacityMain").textContent;
-          video.classList.remove("fade-in");
-          void video.offsetWidth;
-          video.classList.add("fade-in");
-          // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
-          // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
-          video.style.setProperty("--fade-duration", "2s");
-          // Set final opacity
-          video.style.setProperty(
-            "--fade-opacity",
-            document.getElementById("opacityMain").textContent,
-          );
+        // function firstPlayHandler() {
+        //   // avoid clicking durring the fadeIn/out of onTimeUpdate then capture that effect forever
+        //   video.style.opacity =
+        //     document.getElementById("opacityMain").textContent;
+        //   video.classList.remove("fade-in");
+        //   void video.offsetWidth;
+        //   video.classList.add("fade-in");
+        //   // this 2s already match with oshi fade-in bypass, if the value < 2 then that first start will be ignore (because already interfered by browser engine animation, not by opacity)
+        //   // because has existed this, so, no need to edit several seconds at beginning, because it will be fade in anyway. or, jumpToNextSegment in oshi won't work in this case
+        //   video.style.setProperty("--fade-duration", "2s");
+        //   // Set final opacity
+        //   video.style.setProperty(
+        //     "--fade-opacity",
+        //     document.getElementById("opacityMain").textContent,
+        //   );
 
-          temporaryFirstPlay = {
-            logic: true,
-            currentEp: document.title,
-          };
+        //   temporaryFirstPlay = {
+        //     logic: true,
+        //     currentEp: document.title,
+        //   };
 
-          localStorage.setItem(
-            "isRunningFirstPlayHandler",
-            JSON.stringify(temporaryFirstPlay),
-          );
-          // After 2 seconds, set it to false
-          setTimeout(() => {
-            temporaryFirstPlay = {
-              logic: false,
-              currentEp: document.title,
-            };
-            localStorage.setItem(
-              "isRunningFirstPlayHandler",
-              JSON.stringify(temporaryFirstPlay),
-            );
-          }, 3000);
-          console.log("Play event fired (first time)!");
-        }
+        //   localStorage.setItem(
+        //     "isRunningFirstPlayHandler",
+        //     JSON.stringify(temporaryFirstPlay),
+        //   );
+        //   // After 2 seconds, set it to false
+        //   setTimeout(() => {
+        //     temporaryFirstPlay = {
+        //       logic: false,
+        //       currentEp: document.title,
+        //     };
+        //     localStorage.setItem(
+        //       "isRunningFirstPlayHandler",
+        //       JSON.stringify(temporaryFirstPlay),
+        //     );
+        //   }, 3000);
+        //   console.log("Play event fired (first time)!");
+        // }
 
         function normalPlayHandler() {
           video.style.opacity =
@@ -522,13 +529,13 @@
         }
 
         player.on("play", function () {
-          const isAtVideoStart = player.currentTime() <= 0.5;
+          // const isAtVideoStart = player.currentTime() <= 0.5;
 
-          if (!hasHandledInitialPlay && isAtVideoStart) {
-            hasHandledInitialPlay = true;
-            firstPlayHandler();
-            return;
-          }
+          // if (!hasHandledInitialPlay && isAtVideoStart) {
+          //   hasHandledInitialPlay = true;
+          //   firstPlayHandler();
+          //   return;
+          // }
 
           if (hasHandledInitialPlay) {
             normalPlayHandler();
@@ -1284,11 +1291,18 @@
               // }, 300);
               // not do this, already do on oshi to handle when overlay, not duplicate at this side
 
-              // temporary mute the video to avoid the sound of the first frame, then unmute after 0.5s
+              // temporary mute the video to avoid the sound of the first frame, then unmute after receive the play triggered from extension
               player.muted(true);
-              setTimeout(() => {
-                player.muted(false);
-              }, 500);
+              // setTimeout(() => {
+              //   player.muted(false);
+              // }, 10000);
+              // window.addEventListener("message", function (event) {
+              //   if (event.source !== window) return;
+              //   if (event.data && event.data.type === "unmuted") {
+              //     console.log("just receive unmuted")
+              //     player.muted(false);
+              //   }
+              // });
 
               handleDisablePhilo();
             }
