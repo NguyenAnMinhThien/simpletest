@@ -1260,6 +1260,29 @@
               );
             }
           });
+          player.on("fullscreenchange", function () {
+            if (player.isFullscreen()) {
+              console.log("Player is now in FULLSCREEN mode.");
+              // Inside index.html script
+              const sendDataToExtension = () => {
+                window.postMessage(
+                  {
+                    source: "web-page", // A label to identify the sender
+                    action: "SEND_USER_DATA",
+                    payload: { username: "JohnDoe", status: "active" },
+                  },
+                  '*',
+                ); // Using current origin for safety, or '*' if needed
+              };
+
+              // Call the function when needed (e.g., on a button click)
+              sendDataToExtension();
+              // Add your custom enter-fullscreen logic here
+            } else {
+              console.log("Player has EXITED fullscreen mode.");
+              // Add your custom exit-fullscreen logic here
+            }
+          });
           player.on("playlistitem", function () {
             hasHandledInitialPlay = false;
             console.log(
