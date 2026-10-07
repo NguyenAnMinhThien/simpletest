@@ -334,10 +334,10 @@
           hasHandledInitialPlay = true;
         }
 
-        if (event.data && event.data.type === "unmuted") {
-          console.log("just receive unmuted");
-          allPackages.player.muted(false);
-        }
+        // if (event.data && event.data.type === "unmuted") {
+        //   console.log("just receive unmuted");
+        //   allPackages.player.muted(false);
+        // }
       });
 
       // |||||||||| duplicate the fadein and fadeout at content.js, only
@@ -1068,6 +1068,7 @@
                 backward: 5,
               },
             },
+            loadingSpinner: false,
           });
         }
         if (allPackages.videoContainerId == "video") {
@@ -1315,7 +1316,8 @@
               // not do this, already do on oshi to handle when overlay, not duplicate at this side
 
               // temporary mute the video to avoid the sound of the first frame, then unmute after receive the play triggered from extension
-              player.muted(true);
+              // player.muted(true);
+
               // setTimeout(() => {
               //   player.muted(false);
               // }, 10000);
@@ -2094,6 +2096,7 @@
       if (mergeBtn) {
         mergeBtn.addEventListener("click", toggleMerge);
       }
+
     </script>
   </body>
 </html>
