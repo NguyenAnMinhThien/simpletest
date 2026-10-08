@@ -225,3 +225,14 @@ body {
 md-slider {
   min-inline-size: 100px;
 }
+
+/* Instantly turns the video element completely black when waiting */
+.video-js.vjs-waiting .vjs-tech {
+  filter: brightness(0);
+  transition: none !important;
+}
+
+/* Alternative: Covers the entire player canvas in solid black */
+.video-js.vjs-waiting {
+  background-color: #000000 !important;
+}
