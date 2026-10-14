@@ -329,6 +329,11 @@
           // Execute any main page functions here
         }
 
+        // if (event.data && event.data.type === "toggle2MergeEffect") {
+        //   const toggle2MergeEffect = { checked: event.data.data };
+        //   console.log("the value haved checked", toggle2MergeEffect.checked);
+        // }
+
         if (event.data && event.data.type === "hasRunFirstPlay") {
           console.log("has finished first run on startup");
           hasHandledInitialPlay = true;
@@ -342,10 +347,16 @@
 
       // |||||||||| duplicate the fadein and fadeout at content.js, only
 
-      function fadeOutAtTime(videoElement, duration) {
+      function fadeOutAtTime(videoElement, duration, isChooseOldOpacity) {
         // no change much fadeOut from content.js
         const durationMs = duration * 1000;
-        var oldOpacity = 1;
+        if (isChooseOldOpacity) {
+          var oldOpacity = parseFloat(
+            document.getElementById("opacityMain").textContent.trim(),
+          );
+        } else {
+          var oldOpacity = 1;
+        }
         var oldVolume = (function () {
           var el = document.getElementById("volumeMain");
           if (!el) return 0.7;
@@ -397,11 +408,19 @@
         // videoElement.addEventListener("timeupdate", onTimeUpdate);
       }
 
-      function fadeInAtTime(videoElement, duration) {
-        var oldOpacity = parseFloat(
-          document.getElementById("opacityMain").textContent.trim(),
-        );
-        var finalOpacity = 1;
+      function fadeInAtTime(videoElement, duration, isChooseOldOpacity) {
+        if (isChooseOldOpacity) {
+          var oldOpacity = 0;
+          var finalOpacity = parseFloat(
+            document.getElementById("opacityMain").textContent.trim(),
+          );
+        } else {
+          var oldOpacity = parseFloat(
+            document.getElementById("opacityMain").textContent.trim(),
+          );
+          var finalOpacity = 1;
+        }
+
         var targetVolume = (function () {
           var el = document.getElementById("volumeMain");
           if (!el) return 0.7;
@@ -436,13 +455,22 @@
 
             // 1. OPAcity DOM UPDATE
             if (!hasHandledInitialPlay) {
-              if (oldOpacity) {
-                videoElement.style.opacity =
-                  oldOpacity + progress * (finalOpacity - oldOpacity);
-                // console.log("progress");
-              } else {
-                videoElement.style.opacity = progress;
-              }
+              // if (oldOpacity) {
+              //   videoElement.style.opacity =
+              //     oldOpacity + progress * (finalOpacity - oldOpacity);
+              //   // console.log("progress");
+              // } else {
+              //   videoElement.style.opacity = progress;
+              // }
+              // old opacity always exists
+              videoElement.style.opacity =
+                oldOpacity + progress * (finalOpacity - oldOpacity);
+              // console.log(
+              //   "progress of : ",
+              //   videoElement.id,
+              //   " opacity is:",
+              //   videoElement.style.opacity,
+              // );
             }
 
             // 2. VOLUME DOM UPDATE
@@ -455,7 +483,14 @@
           } else {
             // Ensure absolute precise final values on completion
             if (!hasHandledInitialPlay) {
-              videoElement.style.opacity = oldOpacity ? finalOpacity : 1;
+              // videoElement.style.opacity = oldOpacity ? finalOpacity : 1;
+              videoElement.style.opacity = finalOpacity;
+              // console.log(
+              //   "progress of : ",
+              //   videoElement.id,
+              //   " opacity is:",
+              //   videoElement.style.opacity,
+              // );
             }
             videoElement.volume = targetVolume;
           }
@@ -933,6 +968,8 @@
                 removeItems.push(index);
               }
             });
+
+            
             querryArray = querryArray.filter(
               (item, index) => !removeItems.includes(index),
             );
@@ -1272,7 +1309,7 @@
                     action: "SEND_USER_DATA",
                     payload: { username: "JohnDoe", status: "active" },
                   },
-                  '*',
+                  "*",
                 ); // Using current origin for safety, or '*' if needed
               };
 
@@ -1773,11 +1810,32 @@
         // add toggle layer
         if (selection == "middle") {
           console.log("there is middle mouse click");
-          activeVideo.pause();
-          otherVideo.play();
 
-          fadeInAtTime(otherVideo, 1.5); //not change the default opacity of video element
-          fadeOutAtTime(activeVideo, 1.5);
+          var toggle2MergeEffect =
+            document.getElementById("toggle2MergeEffect");
+          if (toggle2MergeEffect && toggle2MergeEffect.checked) {
+            // console.log("Is fading with most feature 0 - oldOpacity");
+            if (activeVideo === videoMain) {
+              videoBg.play();
+              videoMain.pause();
+              // console.log("Is fading videoBg");
+              fadeInAtTime(videoBg, 1.5, false);
+              // console.log("Is fadout videoMain");
+              fadeOutAtTime(videoMain, 1.5, true);
+            } else {
+              videoBg.play();
+              videoMain.play();
+              // console.log("Is fading videoMain");
+              fadeInAtTime(videoMain, 1.5, true);
+            }
+          } else {
+            activeVideo.pause();
+            otherVideo.play();
+            // console.log("Is fading with most feature 0 - 1");
+            // use 1 reduce to 0 and 0.7 increase to 1
+            fadeInAtTime(otherVideo, 1.5, false); //not change the default opacity of video element
+            fadeOutAtTime(activeVideo, 1.5, false);
+          }
         }
       }
       function assignOpacity(container, initialValue, e) {
@@ -2096,7 +2154,6 @@
       if (mergeBtn) {
         mergeBtn.addEventListener("click", toggleMerge);
       }
-
     </script>
   </body>
 </html>
