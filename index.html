@@ -938,55 +938,68 @@
         // This is fixed content can be appear in playlist when it can be important, normal, action. Other will be filtered out depend on the remove box, if the remove is important then below will not appear important' so basicly the below code won't change.
         if (document.getElementById(allPackages.watchedId).checked) {
           if (keyword != "") {
+
             //only arrange the ep follow content in review mode
-            var importantContent = [];
-            var actionContent = [];
-            var removeItems = [];
+            // var importantContent = [];
+            // var actionContent = [];
+            // var removeItems = [];
+
+            // querryArray.forEach((item, index) => {
+            //   // the content need to contain important' key AND there is no 'notimportant' mark down in Additional4
+            //   // or in Additional4, it includes 'important' is also ok
+            //   item.Additional4 =
+            //     item.Additional4 == null ? [] : item.Additional4;
+            //   isImportant =
+            //     (item.content != null &&
+            //       important_pattern.test(item.content.toLowerCase().trim()) &&
+            //       !item.Additional4.includes("notimportant")) ||
+            //     item.Additional4.includes("important");
+            //   isAction =
+            //     (item.content != null &&
+            //       action_pattern.test(item.content.toLowerCase().trim()) &&
+            //       !item.Additional4.includes("notaction")) ||
+            //     item.Additional4.includes("action");
+            //   if (isAction) {
+            //     actionContent.push(item);
+
+            //     removeItems.push(index);
+            //   } else if (isImportant) {
+            //     importantContent.push(item);
+
+            //     removeItems.push(index);
+            //   }
+            // });
+
+            // querryArray = querryArray.filter(
+            //   (item, index) => !removeItems.includes(index),
+            // );
+
+            // importantContent.sort(
+            //   (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+            // );
+            // querryArray.sort(
+            //   (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+            // );
+            // actionContent.sort(
+            //   (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
+            // );
+
+            // querryArray = importantContent
+            //   .concat(querryArray)
+            //   .concat(actionContent);
+
+            // ============================><===============================
+              // modify when the new version solved the action with mute, so no category between these groups.
 
             querryArray.forEach((item, index) => {
-              // the content need to contain important' key AND there is no 'notimportant' mark down in Additional4
-              // or in Additional4, it includes 'important' is also ok
               item.Additional4 =
                 item.Additional4 == null ? [] : item.Additional4;
-              isImportant =
-                (item.content != null &&
-                  important_pattern.test(item.content.toLowerCase().trim()) &&
-                  !item.Additional4.includes("notimportant")) ||
-                item.Additional4.includes("important");
-              isAction =
-                (item.content != null &&
-                  action_pattern.test(item.content.toLowerCase().trim()) &&
-                  !item.Additional4.includes("notaction")) ||
-                item.Additional4.includes("action");
-              if (isAction) {
-                actionContent.push(item);
-
-                removeItems.push(index);
-              } else if (isImportant) {
-                importantContent.push(item);
-
-                removeItems.push(index);
-              }
             });
 
-            
-            querryArray = querryArray.filter(
-              (item, index) => !removeItems.includes(index),
-            );
-
-            importantContent.sort(
-              (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
-            );
             querryArray.sort(
               (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
             );
-            actionContent.sort(
-              (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
-            );
 
-            querryArray = importantContent
-              .concat(querryArray)
-              .concat(actionContent);
           } else {
             // fulfill null value of Additional4
             querryArray.forEach((item, index) => {
