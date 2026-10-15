@@ -48,8 +48,13 @@
           <input id="disable-quill" type="checkbox" /> Disable quill
         </label>
         <label> <input id="watched" type="checkbox" /> Watched </label>
+        <label>
+          <input id="minWatchedCheck" type="checkbox" /> Min watched
+        </label>
+        <input id="minWatched" placeholder="subtract.." value="1" disabled />
         <button id="search-button">Search</button>
         <button id="scroll-to-background" type="button">Go Background</button>
+        <button id="balance" type="button">Balance</button>
       </div>
       <div>
         <input id="subtractOshi" placeholder="subtract.." value="2" />
@@ -938,7 +943,6 @@
         // This is fixed content can be appear in playlist when it can be important, normal, action. Other will be filtered out depend on the remove box, if the remove is important then below will not appear important' so basicly the below code won't change.
         if (document.getElementById(allPackages.watchedId).checked) {
           if (keyword != "") {
-
             //only arrange the ep follow content in review mode
             // var importantContent = [];
             // var actionContent = [];
@@ -989,7 +993,7 @@
             //   .concat(actionContent);
 
             // ============================><===============================
-              // modify when the new version solved the action with mute, so no category between these groups.
+            // modify when the new version solved the action with mute, so no category between these groups.
 
             querryArray.forEach((item, index) => {
               item.Additional4 =
@@ -999,7 +1003,6 @@
             querryArray.sort(
               (a, b) => getMinWatched(keyword, a) - getMinWatched(keyword, b),
             );
-
           } else {
             // fulfill null value of Additional4
             querryArray.forEach((item, index) => {
@@ -1016,6 +1019,17 @@
           // if not sort follow watched then at least need to fullfill these value before create Eposide
           querryArray.forEach((item, index) => {
             item.Additional4 = item.Additional4 == null ? [] : item.Additional4;
+          });
+        }
+
+        const minWatchedCheck = document.getElementById("minWatchedCheck");
+        const minWatchedInput = document.getElementById("minWatched");
+        const minWatchedThreshold = Number(minWatchedInput.value);
+        if (minWatchedCheck.checked && Number.isFinite(minWatchedThreshold)) {
+          const watchedKeyword = keyword || ".";
+          querryArray = querryArray.filter((item) => {
+            const watched = getMinWatched(watchedKeyword, item);
+            return watched !== null && watched >= minWatchedThreshold;
           });
         }
 
@@ -1173,6 +1187,11 @@
         );
 
         console.log("success create playlist", myPlaylist);
+
+        let resolvePlaylistReady;
+        const playlistReady = new Promise((resolve) => {
+          resolvePlaylistReady = resolve;
+        });
 
         player.ready(function () {
           // the list of event is removed from player, clear the previous event register to avoid the conflict in async (the event register itself is registering in async code). But not remove the event at the first time, because it will make the control bar lost the autohide function.
@@ -1505,11 +1524,52 @@
               // }
             }
           });
+
+          resolvePlaylistReady();
         });
+
+        return playlistReady;
 
         // todo: import caption when confirm the subtitles are .srt format
         // await importCaption();
       }
+
+      function waitForVideoReady(packages) {
+        const player = packages.player;
+        const videoElement = packages.videoElement;
+        if (!player || !videoElement || player.playlist().length === 0) {
+          return Promise.reject(
+            new Error("The player has no loaded playlist or video element."),
+          );
+        }
+        if (videoElement.readyState >= 2) {
+          return Promise.resolve();
+        }
+
+        return new Promise((resolve, reject) => {
+          const cleanup = () => {
+            videoElement.removeEventListener("loadeddata", handleLoadedData);
+            videoElement.removeEventListener("error", handleError);
+          };
+          const handleLoadedData = () => {
+            cleanup();
+            resolve();
+          };
+          const handleError = () => {
+            cleanup();
+            reject(new Error("The video failed to load."));
+          };
+
+          videoElement.addEventListener("loadeddata", handleLoadedData, {
+            once: true,
+          });
+          videoElement.addEventListener("error", handleError, { once: true });
+          if (videoElement.readyState >= 2) {
+            handleLoadedData();
+          }
+        });
+      }
+
       function cursorDataSelection(boundaryId) {
         function insertTextAtCursor(target, text) {
           if (!target) {
@@ -1986,6 +2046,12 @@
       const max = document.querySelector("#max");
       const seriesBox = document.querySelector("#series");
       const keywordbox = document.querySelector("#keywordbox");
+      const minWatchedCheck = document.querySelector("#minWatchedCheck");
+      const minWatchedInput = document.querySelector("#minWatched");
+      let mainPlaylistReady = Promise.resolve();
+      minWatchedCheck.addEventListener("change", () => {
+        minWatchedInput.disabled = !minWatchedCheck.checked;
+      });
       keywordbox.value = screen.width < 1000 ? "[a-zA-Z]+\\d{1,2}" : ""; //if this is phone, then assign a specific value
 
       if (disablePhiloCheckbox) {
@@ -2061,7 +2127,7 @@
           searchMax = 1000;
         }
 
-        mainThread(
+        mainPlaylistReady = mainThread(
           value,
           parseInt(searchMin),
           parseInt(searchMax),
@@ -2084,6 +2150,7 @@
         "#background-keywordbox",
       );
       let backGroundKeyword = "";
+      let backgroundPlaylistReady = Promise.resolve();
       let backGroundAllPackages = {
         categoryId: "background-remove-categories",
         player: null,
@@ -2130,7 +2197,7 @@
           searchMax = 1000;
         }
 
-        mainThread(
+        backgroundPlaylistReady = mainThread(
           value,
           parseInt(searchMin),
           parseInt(searchMax),
@@ -2140,6 +2207,42 @@
         );
         console.log("Search term:", value);
       });
+
+      const balanceButton = document.getElementById("balance");
+      if (balanceButton) {
+        balanceButton.addEventListener("click", async () => {
+          balanceButton.disabled = true;
+          try {
+            minWatchedCheck.checked = true;
+            minWatchedInput.disabled = false;
+            autoImport.checked = false;
+            keywordbox.value = "[a-zA-Z]+\\d{1,2}";
+
+            searchButton.click();
+            await mainPlaylistReady;
+            await waitForVideoReady(allPackages);
+
+            const backgroundSearchInput = document.getElementById(
+              "background-site-search",
+            );
+            if (!backgroundSearchInput.value.trim()) {
+              backgroundSearchInput.value =
+                localStorage.getItem("backgroundMovie") || "nsfaudio";
+            }
+            document.getElementById("background-watched").checked = true;
+
+            backGroundSearchButton.click();
+            await backgroundPlaylistReady;
+            await waitForVideoReady(backGroundAllPackages);
+
+            mergeBtn.click();
+          } catch (error) {
+            console.error("Balance setup failed:", error);
+          } finally {
+            balanceButton.disabled = false;
+          }
+        });
+      }
 
       // ----*--*---- add merged function
 
