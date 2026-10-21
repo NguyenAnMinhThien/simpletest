@@ -1932,11 +1932,20 @@
             // console.log("Is fading with most feature 0 - oldOpacity");
             if (activeVideo === videoMain) {
               videoBg.play();
-              videoMain.pause();
+              
               // console.log("Is fading videoBg");
-              fadeInAtTime(videoBg, 1.5, false);
+              if (
+                Number.parseFloat(window.getComputedStyle(videoBg).opacity) ===
+                0
+              ) {
+                fadeInAtTime(videoBg, 1.5, false);
+              }
               // console.log("Is fadout videoMain");
               fadeOutAtTime(videoMain, 2, true);
+              setTimeout(() => {
+                videoMain.pause();
+              }, 2000);
+
             } else {
               videoBg.play();
               videoMain.play();
