@@ -1670,10 +1670,32 @@
 
       function startTimestampMonitor() {
         clearTimestampMonitor();
+        let highlightStyle = document.getElementById(
+          "timestamp-monitor-highlight-style",
+        );
+        if (!highlightStyle) {
+          highlightStyle = document.createElement("style");
+          highlightStyle.id = "timestamp-monitor-highlight-style";
+          document.head.appendChild(highlightStyle);
+        }
+        highlightStyle.textContent = "";
+        let lastHighlightSelector = "";
+
+        const updateHighlight = (selector) => {
+          if (selector === lastHighlightSelector) return;
+          lastHighlightSelector = selector;
+          highlightStyle.textContent = selector
+            ? `${selector} { background-color: rgba(0,120,215,0.25) !important; }`
+            : "";
+        };
+
         window.timestampMonitorInterval = setInterval(() => {
           // will monitor if exist the element given only.
           const timestampEditor = document.querySelector("#timestamp-editor");
-          if (!timestampEditor || !window.player) return;
+          if (!timestampEditor || !window.player) {
+            updateHighlight("");
+            return;
+          }
 
           // const pNodes = Array.from(timestampEditor.querySelectorAll("p"));
           // get only the visible nodes
@@ -1682,7 +1704,10 @@
           ).filter((el) => {
             return window.getComputedStyle(el).display !== "none";
           });
-          if (pNodes.length === 0) return;
+          if (pNodes.length === 0) {
+            updateHighlight("");
+            return;
+          }
 
           // Extract leading timestamps (HH:MM:SS or MM:SS) into seconds or null
           const times = pNodes.map((node) => {
@@ -1715,13 +1740,30 @@
             }
           }
 
-          pNodes.forEach((node, idx) => {
-            if (idx === activeIndex) {
-              node.style.backgroundColor = "rgba(0,120,215,0.25)"; // blue highlight
-            } else {
-              node.style.backgroundColor = "";
-            }
-          });
+          const activeNode = pNodes[activeIndex];
+          if (!activeNode) {
+            updateHighlight("");
+            return;
+          }
+
+          const selectorParts = [];
+          let currentNode = activeNode;
+          while (currentNode && currentNode !== timestampEditor) {
+            const siblingIndex = Array.prototype.indexOf.call(
+              currentNode.parentElement.children,
+              currentNode,
+            );
+            selectorParts.unshift(
+              `${currentNode.tagName.toLowerCase()}:nth-child(${siblingIndex + 1})`,
+            );
+            currentNode = currentNode.parentElement;
+          }
+
+          updateHighlight(
+            currentNode === timestampEditor
+              ? `#timestamp-editor > ${selectorParts.join(" > ")}`
+              : "",
+          );
         }, 500);
         console.log("I am running 2");
       }
