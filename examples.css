@@ -4,7 +4,7 @@
 */
 
 body {
-  background-color: green;
+  background-color: green !important;
   font-family: Arial, sans-serif;
 }
 
